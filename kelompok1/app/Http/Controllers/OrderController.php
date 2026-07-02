@@ -16,7 +16,6 @@ class OrderController extends Controller
     {
         $orders = Order::latest()->get();
         
-        dd($orders); 
 
         return view('order.index', compact('orders'));
     }
