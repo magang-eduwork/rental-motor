@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_items', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('order_id')->constrained()->onDelete('cascade');
-        $table->foreignId('product_id')->constrained();
-        $table->integer('harga_saat_sewa'); // Penting jika harga motor berubah di masa depan
-        $table->timestamps();
+            $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained();
+            $table->integer('harga_saat_sewa'); // Penting jika harga motor berubah di masa depan
+            $table->timestamps();
         });
     }
 
