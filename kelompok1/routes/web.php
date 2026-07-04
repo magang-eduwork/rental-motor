@@ -8,6 +8,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
+
 // Rute untuk daftar pesanan
 // Menggunakan OrderController untuk menangani logika pemesanan
 Route::get('/daftar-pesanan', [OrderController::class, 'index'])->name('order.index');
