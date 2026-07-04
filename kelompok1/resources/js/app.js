@@ -1,1 +1,1 @@
-//
+// Default Laravel entry point
