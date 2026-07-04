@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'ED.RENT') | Rental Motor</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-<title>@yield('title','ED.RENT')</title>
-
-    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/footer.css') }}">
-
+    <!-- Tailwind CSS & JS via Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
     @stack('styles')
-
 </head>
-
-<body>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col justify-between">
 
     @include('components.navbar')
 
-    <main>
+    <main class="flex-grow">
         @yield('content')
     </main>
 

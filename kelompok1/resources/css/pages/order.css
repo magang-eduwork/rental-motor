@@ -1,0 +1,24 @@
+/* Layout khusus halaman Order */
+.order-container {
+    padding: 64px 0;
+}
+
+ol.terms {
+    margin: 0;
+    padding-left: 1.35rem;
+    color: #334155;
+    display: grid;
+    gap: 14px;
+}
+
+.motor-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 18px;
+    gap: 16px;
+}
+
+.motor-price strong {
+    font-size: 1.15rem;
+}
