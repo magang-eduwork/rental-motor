@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_booking');
+            $table->string('kode_booking')->unique();
             $table->string('nama_motor');
+            $table->string('nama_pemesan')->nullable(); // Kolom yang tadinya Anda tambah terpisah
+            $table->string('no_wa')->nullable();
             $table->date('tanggal_booking');
-            $table->string('status'); // Contoh status: Belum bayar, Sedang dibawa, dll
+            $table->datetime('tanggal_sewa')->nullable();
+            $table->datetime('tanggal_selesai')->nullable();
+            $table->string('status')->default('pending');
             $table->decimal('harga', 10, 2);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('orders');
