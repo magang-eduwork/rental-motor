@@ -1,0 +1,24 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-body);
+    color: var(--text-main);
+    font-family: var(--font-base);
+    line-height: 1.6;
+}
+
+.container {
+    width: min(100%, 1200px);
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+header,
+footer {
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+}
