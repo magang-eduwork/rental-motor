@@ -7,7 +7,7 @@
 
         <!-- Navigation Links -->
         <nav class="hidden md:flex items-center space-x-8">
-            <a href="{{ url('/') }}" class="text-gray-600 hover:text-indigo-600 font-semibold text-sm transition">Home</a>
+            <a href="{{ route('home') }}" class="text-sm font-semibold text-gray-600 transition hover:text-indigo-600">Home</a>
             <a href="#motors" class="text-gray-600 hover:text-indigo-600 font-semibold text-sm transition">Pilih Kendaraan</a>
             <a href="{{ route('order.index') }}" class="text-gray-600 hover:text-indigo-600 font-semibold text-sm transition">Daftar Pesanan</a>
         </nav>

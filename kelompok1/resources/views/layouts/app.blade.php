@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+    <!-- Alpine.js (Ditaruh di head agar tersedia sebelum komponen di-render) -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Tailwind CSS & JS via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -24,5 +27,6 @@
 
     @include('components.footer')
 
+    @stack('scripts')
 </body>
 </html>
