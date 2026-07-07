@@ -19,13 +19,17 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col justify-between">
 
+    @if (!Request::routeIs('login') && !Request::routeIs('register'))
     @include('components.navbar')
+    @endif
 
     <main class="flex-grow">
         @yield('content')
     </main>
 
+    @if (!Request::routeIs('login') && !Request::routeIs('register'))
     @include('components.footer')
+    @endif
 
     @stack('scripts')
 </body>

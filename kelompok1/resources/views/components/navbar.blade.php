@@ -1,7 +1,7 @@
 <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-[1200px] mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="max-w-300 mx-auto px-6 py-4 flex justify-between items-center">
         <!-- Brand -->
-        <a href="{{ url('/') }}" class="text-2xl font-black tracking-tight text-indigo-600 hover:opacity-90 transition">
+        <a href="{{ route('home') }}" class="text-2xl font-black tracking-tight text-indigo-600 hover:opacity-90 transition">
             ED.RENT
         </a>
 
@@ -21,9 +21,51 @@
                 </svg>
                 <span>Butuh bantuan?</span>
             </a>
-            <!-- Avatar -->
-            <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop" alt="Profile" class="w-full h-full object-cover" />
+            <!-- Avatar Dropdown -->
+            <div x-data="{ open: false }" class="relative">
+                <button
+                    @click="open = !open"
+                    class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 focus:outline-none"
+                >
+                    <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop"
+                    alt="Profile"
+                    class="w-full h-full object-cover"
+                    >
+                </button>
+
+                <!-- Dropdown -->
+                <div
+                x-show="open"
+                @click.away="open = false"
+                x-transition
+                class="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                >
+
+                    @guest
+                        <a href="{{ route('login') }}"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Login
+                        </a>
+                    @endguest
+
+                    @auth
+                        <a href="{{ route('profile') }}"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Profile
+                        </a>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                            <button
+                            type="submit"
+                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            Logout
+                            </button>
+                        </form>
+                    @endauth
+
+                </div>
             </div>
         </div>
     </div>
