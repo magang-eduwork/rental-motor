@@ -9,12 +9,8 @@ class Order extends Model
 {
     use HasFactory;
 
-    /**
-     * Kolom yang dapat diisi secara massal (Mass Assignment).
-     * 
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'user_id',
         'kode_booking',
         'nama_motor',
         'nama_pemesan',
@@ -22,15 +18,11 @@ class Order extends Model
         'tanggal_booking',
         'tanggal_sewa',
         'tanggal_selesai',
+        'durasi_hari',
         'status',
         'harga',
     ];
 
-    /**
-     * Konversi tipe data otomatis.
-     * 
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -39,5 +31,15 @@ class Order extends Model
             'tanggal_sewa'    => 'datetime',
             'tanggal_selesai' => 'datetime',
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(\App\Models\OrderItem::class);
     }
 }

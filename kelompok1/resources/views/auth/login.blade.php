@@ -7,7 +7,7 @@
     <!-- Left Side -->
     <div class="relative hidden lg:block lg:col-span-2 overflow-hidden">
         <img
-        src="https://i.ibb.co.com/Lh9d84PX/a44f9055b40db9210198bda81452bbb436eb019d.jpg"
+        src="{{ $heroImage }}"
         alt="Rental motor ED.RENT" class="absolute inset-0 w-full h-full object-cover"
 
         />
