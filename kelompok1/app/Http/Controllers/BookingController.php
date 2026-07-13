@@ -7,54 +7,65 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    /**
-     * Simpan pesanan baru dari halaman Daftar Kendaraan.
-     * Route ini dilindungi middleware 'auth'.
-     */
+    public function create(Product $product)
+    {
+        return view('booking.checkout', compact('product'));
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
+        // 1. Validasi Input
+        $validated = $request->validate([
             'product_id'    => ['required', 'exists:products,id'],
             'tanggal_sewa'  => ['required', 'date', 'after_or_equal:today'],
-            'jam_sewa'      => ['required', 'string'],
             'durasi'        => ['required', 'integer', 'min:1', 'max:30'],
+            'no_ktp'        => ['required', 'string', 'max:20'],
+            'no_sim'        => ['required', 'string', 'max:20'],
         ]);
 
-        $product = Product::findOrFail($request->product_id);
-        $user    = $request->user();
+        $product = Product::findOrFail($validated['product_id']);
+        $user    = Auth::user();
 
-        $tanggalSewa    = $request->tanggal_sewa . ' ' . $request->jam_sewa . ':00';
-        $tanggalSelesai = date(
-            'Y-m-d H:i:s',
-            strtotime($tanggalSewa . ' +' . $request->durasi . ' days')
-        );
+        // 2. Kalkulasi Tanggal & Harga
+        // Karena form tidak punya jam_sewa, kita gunakan default '08:00:00'
+        $tanggalSewa    = $validated['tanggal_sewa'] . ' 08:00:00';
+        $durasi         = (int) $validated['durasi'];
+        $tanggalSelesai = date('Y-m-d H:i:s', strtotime($tanggalSewa . ' +' . $durasi . ' days'));
+        $totalHarga     = $product->harga_per_hari * $durasi;
 
-        $totalHarga = $product->harga_per_hari * $request->durasi;
+        // 3. Proses Transaksi Database
+        $order = DB::transaction(function () use ($validated, $product, $user, $tanggalSewa, $tanggalSelesai, $totalHarga, $durasi) {
+            
+            $newOrder = Order::create([
+                'user_id'         => $user->id,
+                'product_id'      => $product->id,
+                'kode_booking'    => 'BK-' . strtoupper(Str::random(8)),
+                'nama_motor'      => $product->nama_motor,
+                'nama_pemesan'    => $user->name,
+                'no_wa'           => $user->phone ?? '-', // Pastikan nama kolom di DB sesuai (phone atau whatsapp)
+                'no_ktp'          => $validated['no_ktp'],
+                'no_sim'          => $validated['no_sim'],
+                'tanggal_booking' => now(),
+                'tanggal_sewa'    => $tanggalSewa,
+                'tanggal_selesai' => $tanggalSelesai,
+                'durasi_hari'     => $durasi,
+                'status'          => 'pending',
+                'harga'           => $totalHarga,
+            ]);
 
-        // Buat order
-        $order = Order::create([
-            'user_id'          => $user->id,
-            'kode_booking'     => 'BK-' . strtoupper(Str::random(8)),
-            'nama_motor'       => $product->nama_motor,
-            'nama_pemesan'     => $user->name,
-            'no_wa'            => $user->whatsapp,
-            'tanggal_booking'  => now(),
-            'tanggal_sewa'     => $tanggalSewa,
-            'tanggal_selesai'  => $tanggalSelesai,
-            'durasi_hari'      => $request->durasi,
-            'status'           => 'pending',
-            'harga'            => $totalHarga,
-        ]);
+            OrderItem::create([
+                'order_id'        => $newOrder->id,
+                'product_id'      => $product->id,
+                'harga_saat_sewa' => $product->harga_per_hari,
+            ]);
 
-        // Buat order item
-        OrderItem::create([
-            'order_id'       => $order->id,
-            'product_id'     => $product->id,
-            'harga_saat_sewa'=> $product->harga_per_hari,
-        ]);
+            return $newOrder;
+        });
 
         return redirect()->route('order.index')
             ->with('success', "Booking berhasil! Kode booking Anda: {$order->kode_booking}");

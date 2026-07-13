@@ -6,10 +6,9 @@ use App\Http\Controllers\BookingController;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
-// Rute Halaman Utama & Publik
-Route::get('/', function () {
-    return view('welcome');
-});
+// --- Rute Publik ---
+// Menggunakan sintaks ringkas untuk route sederhana
+Route::get('/', fn() => view('welcome'));
 
 Route::get('/home', function () {
     $products = Product::take(4)->get();
@@ -32,22 +31,28 @@ Route::get('/kendaraan', function () {
     return view('kendaraan', compact('products', 'tipes'));
 })->name('kendaraan');
 
-// Rute yang membutuhkan Login
+// --- Rute Terproteksi (Login Required) ---
 Route::middleware('auth')->group(function () {
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Booking
-    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    // Profile Management
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
+    
+    // Booking & Checkout Flow
+    Route::prefix('booking')->group(function () {
+        // Halaman Checkout: Menggunakan route model binding otomatis
+        Route::get('/checkout/{product}', [BookingController::class, 'create'])->name('booking.checkout');
+        
+        // Memproses Pesanan: Tetap gunakan .store sebagai nama standar
+        Route::post('/store', [BookingController::class, 'store'])->name('booking.store');
+    });
 
-    // Rute Modul Pemesanan (Order)
-    // Dipindahkan ke dalam middleware 'auth' agar akses lebih aman
+    // Order Management
     Route::prefix('daftar-pesanan')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('order.index');
-        
-        // Menggunakan {id} agar eksplisit cocok dengan parameter $id di Controller
         Route::get('/{id}', [OrderController::class, 'show'])->name('order.show');
     });
 });

@@ -11,13 +11,18 @@ class Order extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
         'user_id',
-        'product_id', // Pastikan kolom ini ada di database jika ingin menggunakan relasi
+        'product_id',
         'kode_booking',
         'nama_motor',
         'nama_pemesan',
         'no_wa',
+        'no_ktp',       // Ditambahkan untuk mendukung fitur Checkout
+        'no_sim',       // Ditambahkan untuk mendukung fitur Checkout
         'tanggal_booking',
         'tanggal_sewa',
         'tanggal_selesai',
@@ -26,6 +31,9 @@ class Order extends Model
         'harga',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -36,20 +44,25 @@ class Order extends Model
         ];
     }
 
-    // Relasi ke User
+    /**
+     * Relasi ke User (Pemesan)
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Product (Ini yang menyebabkan error sebelumnya)
-    // Pastikan foreign key 'product_id' sesuai dengan nama kolom di tabel orders Anda
+    /**
+     * Relasi ke Product (Kendaraan yang disewa)
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    // Relasi ke OrderItems
+    /**
+     * Relasi ke OrderItems (Detail item pesanan)
+     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
