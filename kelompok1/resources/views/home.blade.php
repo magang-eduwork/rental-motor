@@ -9,7 +9,7 @@
 @section('content')
 <section class="hero">
     <img
-        src="https://i.ibb.co.com/Lh9d84PX/a44f9055b40db9210198bda81452bbb436eb019d.jpg"
+        src="{{ $heroImage }}"
         alt="Rental motor ED.RENT"
     />
     <div class="container hero-content">
@@ -126,7 +126,7 @@
     <div class="container">
         <div class="section-header section-header--motors">
             <h2 class="section-title">Pilihan Motor Terpopuler</h2>
-            <a href="#" class="section-link">Lihat semua</a>
+            <a href="{{ route('kendaraan') }}" class="section-link">Lihat semua</a>
         </div>
         <p class="section-subtitle">
             Pilih kendaraan yang paling sesuai dengan gaya
@@ -135,109 +135,33 @@
         </p>
 
         <div class="grid grid-4 motors-grid">
+            @foreach($products as $product)
             <article class="motor-card">
                 <div class="motor-meta">
-                    <p class="motor-name">Vega Force</p>
-                    <p class="motor-type">Matic</p>
+                    <p class="motor-name">{{ $product->nama_motor }}</p>
+                    <p class="motor-type">{{ $product->tipe }}</p>
                 </div>
                 <div class="motor-image">
                     <img
-                        src="https://i.ibb.co.com/VYfhgqm4/image-44.png"
-                        alt="Vega Force"
+                        src="{{ $product->image_url }}"
+                        alt="{{ $product->nama_motor }}"
                     />
                 </div>
                 <div class="motor-info">
-                    <span>AB 9001 DE</span>
-                    <span class="motor-available">Tersedia</span>
+                    <span>{{ $product->plat_nomor }}</span>
+                    <span class="motor-available">{{ ucfirst($product->status) }}</span>
                 </div>
                 <div class="motor-price">
                     <div>
-                        <strong>Rp75.000</strong>
+                        <strong>Rp{{ number_format($product->harga_per_hari, 0, ',', '.') }}</strong>
                         <span class="price-unit">/ hari</span>
                     </div>
-                    <button class="book-button" type="button">
+                    <a href="{{ route('kendaraan') }}" class="book-button" style="display: inline-block; text-align: center; text-decoration: none;">
                         Booking
-                    </button>
+                    </a>
                 </div>
             </article>
-
-            <article class="motor-card">
-                <div class="motor-meta">
-                    <p class="motor-name">Vega Force</p>
-                    <p class="motor-type">Matic</p>
-                </div>
-                <div class="motor-image">
-                    <img
-                        src="https://i.ibb.co.com/VYfhgqm4/image-44.png"
-                        alt="Vega Force"
-                    />
-                </div>
-                <div class="motor-info">
-                    <span>AB 9001 DE</span>
-                    <span class="motor-available">Tersedia</span>
-                </div>
-                <div class="motor-price">
-                    <div>
-                        <strong>Rp75.000</strong>
-                        <span class="price-unit">/ hari</span>
-                    </div>
-                    <button class="book-button" type="button">
-                        Booking
-                    </button>
-                </div>
-            </article>
-
-            <article class="motor-card">
-                <div class="motor-meta">
-                    <p class="motor-name">Vega Force</p>
-                    <p class="motor-type">Matic</p>
-                </div>
-                <div class="motor-image">
-                    <img
-                        src="https://i.ibb.co.com/VYfhgqm4/image-44.png"
-                        alt="Vega Force"
-                    />
-                </div>
-                <div class="motor-info">
-                    <span>AB 9001 DE</span>
-                    <span class="motor-available">Tersedia</span>
-                </div>
-                <div class="motor-price">
-                    <div>
-                        <strong>Rp75.000</strong>
-                        <span class="price-unit">/ hari</span>
-                    </div>
-                    <button class="book-button" type="button">
-                        Booking
-                    </button>
-                </div>
-            </article>
-
-            <article class="motor-card">
-                <div class="motor-meta">
-                    <p class="motor-name">Vega Force</p>
-                    <p class="motor-type">Matic</p>
-                </div>
-                <div class="motor-image">
-                    <img
-                        src="https://i.ibb.co.com/VYfhgqm4/image-44.png"
-                        alt="Vega Force"
-                    />
-                </div>
-                <div class="motor-info">
-                    <span>AB 9001 DE</span>
-                    <span class="motor-available">Tersedia</span>
-                </div>
-                <div class="motor-price">
-                    <div>
-                        <strong>Rp75.000</strong>
-                        <span class="price-unit">/ hari</span>
-                    </div>
-                    <button class="book-button" type="button">
-                        Booking
-                    </button>
-                </div>
-            </article>
+            @endforeach
         </div>
     </div>
 </section>
