@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
@@ -11,6 +13,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'product_id', // Pastikan kolom ini ada di database jika ingin menggunakan relasi
         'kode_booking',
         'nama_motor',
         'nama_pemesan',
@@ -33,13 +36,22 @@ class Order extends Model
         ];
     }
 
-    public function user()
+    // Relasi ke User
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function items()
+    // Relasi ke Product (Ini yang menyebabkan error sebelumnya)
+    // Pastikan foreign key 'product_id' sesuai dengan nama kolom di tabel orders Anda
+    public function product(): BelongsTo
     {
-        return $this->hasMany(\App\Models\OrderItem::class);
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    // Relasi ke OrderItems
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }
