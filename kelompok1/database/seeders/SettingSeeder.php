@@ -16,5 +16,10 @@ class SettingSeeder extends Seeder
             ['key' => 'hero_image_url'],
             ['value' => 'https://i.ibb.co.com/Lh9d84PX/a44f9055b40db9210198bda81452bbb436eb019d.jpg']
         );
+
+        \App\Models\Setting::updateOrCreate(
+            ['key' => 'favicon_url'],
+            ['value' => 'https://i.ibb.co.com/qF5ByfcT/favicon-rental.png']
+        );
     }
 }
