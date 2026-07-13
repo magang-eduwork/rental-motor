@@ -171,22 +171,14 @@
                         <span class="k-price-unit">/ hari</span>
                     </div>
 
-                    {{-- Tombol Booking: beda tampilan untuk guest vs user login --}}
+                    {{-- Tombol Booking --}}
                     @auth
                         @if($product->status === 'tersedia')
-                            <form
-                                method="POST"
-                                action="{{ route('booking.store') }}"
-                                class="booking-form"
-                                onsubmit="return syncBookingForm(this)"
-                            >
-                                @csrf
-                                <input type="hidden" name="product_id"   value="{{ $product->id }}">
-                                <input type="hidden" name="tanggal_sewa" value="{{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}" class="inp-tanggal">
-                                <input type="hidden" name="jam_sewa"     value="{{ request('jam_sewa', '08:00') }}" class="inp-jam">
-                                <input type="hidden" name="durasi"       value="{{ request('durasi', 1) }}" class="inp-durasi">
-                                <button type="submit" class="k-book-btn">Booking</button>
-                            </form>
+                            {{-- Kita arahkan ke rute checkout dan mengirimkan parameter filter via URL --}}
+                            <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" 
+                            class="k-book-btn">
+                                Booking
+                            </a>
                         @else
                             <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
                         @endif
@@ -200,38 +192,25 @@
     @endif
 </div>
 
-{{-- Terms Section --}}
-<section class="terms-section">
-    <div class="k-container">
-        <h2 class="terms-title">Syarat &amp; Ketentuan Rental Motor</h2>
-        <p class="terms-subtitle">
-            Transparansi adalah kunci. Pastikan Anda memenuhi beberapa persyaratan dasar sebelum melakukan pemesanan.
-        </p>
-        <ol class="terms-list">
-            <li>
-                Lakukan pemesanan minimal <strong>1×24 jam</strong> sebelum waktu penggunaan.
-                Setelah pesanan dikonfirmasi, penyewa wajib melakukan konfirmasi pengambilan motor melalui nomor
-                whatsapp atau datang ke lokasi ED.RENT.
-            </li>
-            <li>Membawa <strong>2 kartu identitas</strong> (SIM A, KK, KTP, ID Kerja atau ID Pelajar)</li>
-            <li>Menyertakan akun sosial media dan <strong>nomor whatsapp</strong> yang aktif.</li>
-            <li>
-                Pada saat serah terima kendaraan, pihak penyedia rental akan melakukan
-                <strong>pengecekan keaslian data</strong> dan kondisi kendaraan.
-            </li>
-            <li>
-                Pihak penyedia rental <strong>berhak membatalkan</strong> apabila data tidak sesuai
-                dan syarat sewa tidak dapat dilengkapi.
-            </li>
-            <li>
-                Apabila pembayaran telah selesai dan kendaraan yang dipesan tidak tersedia, penyewa
-                <strong>berhak memilih kendaraan lain</strong> yang tersedia tanpa dikenakan biaya tambahan.
-            </li>
-        </ol>
-    </div>
-</section>
+    {{-- Terms Section --}}
+    <section class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat & Ketentuan Rental Motor</h2>
+            <p class="text-gray-600 mb-8">
+                Transparansi adalah kunci. Pastikan Anda memenuhi beberapa persyaratan dasar sebelum melakukan pemesanan.
+            </p>
+            <ol class="list-decimal list-inside space-y-4 text-gray-700">
+                <li>Lakukan pemesanan minimal <strong>1×24 jam</strong> sebelum waktu penggunaan. Setelah pesanan dikonfirmasi, penyewa wajib melakukan konfirmasi pengambilan motor melalui nomor whatsapp atau datang ke lokasi ED.RENT.</li>
+                <li>Membawa <strong>2 kartu identitas</strong> (SIM A, KK, KTP, ID Kerja atau ID Pelajar).</li>
+                <li>Menyertakan akun sosial media dan <strong>nomor whatsapp</strong> yang aktif.</li>
+                <li>Pada saat serah terima kendaraan, pihak penyedia rental akan melakukan <strong>pengecekan keaslian data</strong> dan kondisi kendaraan.</li>
+                <li>Pihak penyedia rental <strong>berhak membatalkan</strong> apabila data tidak sesuai dan syarat sewa tidak dapat dilengkapi.</li>
+                <li>Apabila pembayaran telah selesai dan kendaraan yang dipesan tidak tersedia, penyewa <strong>berhak memilih kendaraan lain</strong> yang tersedia tanpa dikenakan biaya tambahan.</li>
+            </ol>
+        </div>
+    </section>
 
-@endsection
+    @endsection
 
 @push('scripts')
 <script>

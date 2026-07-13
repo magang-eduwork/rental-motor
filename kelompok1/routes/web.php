@@ -3,20 +3,20 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BookingController;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
-// Rute Halaman Utama & Publik
-Route::get('/', function () {
-    return view('welcome');
-});
+// --- Rute Publik ---
+// Menggunakan sintaks ringkas untuk route sederhana
+Route::get('/', fn() => view('welcome'));
 
 Route::get('/home', function () {
-    $products = \App\Models\Product::take(4)->get();
+    $products = Product::take(4)->get();
     return view('home', compact('products'));
 })->name('home');
 
 Route::get('/kendaraan', function () {
-    $query = \App\Models\Product::query();
+    $query = Product::query();
 
     if (request('tipe') && request('tipe') !== 'Semua') {
         $query->where('tipe', request('tipe'));
@@ -26,30 +26,34 @@ Route::get('/kendaraan', function () {
     }
 
     $products = $query->get();
-    $tipes = \App\Models\Product::select('tipe')->distinct()->pluck('tipe');
+    $tipes = Product::select('tipe')->distinct()->pluck('tipe');
 
     return view('kendaraan', compact('products', 'tipes'));
 })->name('kendaraan');
 
-// User sudah login
+// --- Rute Terproteksi (Login Required) ---
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    // Booking
-    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-});
-
-// Rute Modul Pemesanan (Order)
-// Gunakan prefix agar rute detail tidak konflik dengan URL lain
-Route::prefix('daftar-pesanan')->group(function () {
-    Route::controller(OrderController::class)->group(function () {
-        // GET /daftar-pesanan
-        Route::get('/', 'index')->name('order.index');
+    
+    // Profile Management
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'edit')->name('profile.edit');
+        Route::patch('/profile', 'update')->name('profile.update');
+        Route::delete('/profile', 'destroy')->name('profile.destroy');
+    });
+    
+    // Booking & Checkout Flow
+    Route::prefix('booking')->group(function () {
+        // Halaman Checkout: Menggunakan route model binding otomatis
+        Route::get('/checkout/{product}', [BookingController::class, 'create'])->name('booking.checkout');
         
-        // GET /daftar-pesanan/{order}
-        // Penambahan prefix di atas mencegah rute ini menimpa URL lain
-        Route::get('/{order}', 'show')->name('order.show');
+        // Memproses Pesanan: Tetap gunakan .store sebagai nama standar
+        Route::post('/store', [BookingController::class, 'store'])->name('booking.store');
+    });
+
+    // Order Management
+    Route::prefix('daftar-pesanan')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('order.index');
+        Route::get('/{id}', [OrderController::class, 'show'])->name('order.show');
     });
 });
 
