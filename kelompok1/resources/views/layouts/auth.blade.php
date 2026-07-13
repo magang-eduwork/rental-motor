@@ -6,6 +6,9 @@
 
     <title>@yield('title') | ED.RENT</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ $favicon }}">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen">
