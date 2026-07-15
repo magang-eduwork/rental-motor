@@ -159,9 +159,15 @@
                         </svg>
                         <span>{{ $product->plat_nomor }}</span>
                     </div>
-                    <span class="k-card-status {{ $product->status === 'tersedia' ? 'k-card-status--available' : 'k-card-status--unavailable' }}">
-                        {{ ucfirst($product->status) }}
-                    </span>
+                    @if(in_array($product->id, $bookedProductIds))
+                        <span class="k-card-status k-card-status--unavailable bg-red-100 text-red-700">
+                            Sudah di-booking
+                        </span>
+                    @else
+                        <span class="k-card-status {{ $product->status === 'tersedia' ? 'k-card-status--available' : 'k-card-status--unavailable' }}">
+                            {{ ucfirst($product->status) }}
+                        </span>
+                    @endif
                 </div>
 
                 {{-- Harga & Booking --}}
@@ -172,19 +178,23 @@
                     </div>
 
                     {{-- Tombol Booking --}}
-                    @auth
-                        @if($product->status === 'tersedia')
-                            {{-- Kita arahkan ke rute checkout dan mengirimkan parameter filter via URL --}}
-                            <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" 
-                            class="k-book-btn">
-                                Booking
-                            </a>
-                        @else
-                            <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
-                        @endif
+                    @if(in_array($product->id, $bookedProductIds))
+                        <span class="k-book-btn k-book-btn--disabled" title="Sudah di-booking pada tanggal ini">Sudah di-booking</span>
                     @else
-                        <a href="{{ route('login') }}" class="k-book-btn k-book-btn--guest">Login</a>
-                    @endauth
+                        @auth
+                            @if($product->status === 'tersedia')
+                                {{-- Kita arahkan ke rute checkout dan mengirimkan parameter filter via URL --}}
+                                <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" 
+                                class="k-book-btn">
+                                    Booking
+                                </a>
+                            @else
+                                <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}" class="k-book-btn k-book-btn--guest">Login</a>
+                        @endauth
+                    @endif
                 </div>
             </article>
             @endforeach

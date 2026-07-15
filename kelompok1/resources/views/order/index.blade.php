@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto py-16 px-6" 
-     x-data="{ open: false, selectedOrder: null }" 
+     x-data="{ open: false, selectedOrder: null, paymentOpen: false, selectedOrderForPayment: null, selectedPaymentMethod: '' }" 
      x-cloak>
     
     <div class="mb-10">
@@ -14,8 +14,8 @@
     <div class="grid gap-6 mb-16">
         @forelse($orders as $order)
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6">
-            <div class="w-full md:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden">
-                <img src="https://i.ibb.co.com/VYfhgqm4/image-44.png" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
+            <div class="w-full md:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
+                <img src="{{ $order->product && $order->product->image_url ? (Str::startsWith($order->product->image_url, ['http://', 'https://']) ? $order->product->image_url : asset($order->product->image_url)) : 'https://i.ibb.co.com/VYfhgqm4/image-44.png' }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="w-full md:w-auto">
+            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
                 <button 
                     type="button"
                     @click="
@@ -61,9 +61,21 @@
                                 alert('Terjadi kesalahan saat memuat detail.');
                             });
                     "
-                    class="w-full text-center bg-indigo-600 text-white px-6 py-2 rounded-full font-bold hover:bg-indigo-700 transition cursor-pointer">
+                    class="w-full text-center bg-indigo-600 text-white px-6 py-2 rounded-full font-bold hover:bg-indigo-700 transition cursor-pointer whitespace-nowrap">
                     Detail
                 </button>
+                @if(in_array(strtolower($order->status), ['pending', 'belum bayar']))
+                <button 
+                    type="button"
+                    @click="
+                        selectedOrderForPayment = { id: '{{ $order->id }}', kode_booking: '{{ $order->kode_booking }}', nama_motor: '{{ $order->nama_motor }}', harga: '{{ $order->harga }}' };
+                        selectedPaymentMethod = '';
+                        paymentOpen = true;
+                    "
+                    class="w-full text-center bg-emerald-600 text-white px-6 py-2 rounded-full font-bold hover:bg-emerald-700 transition cursor-pointer whitespace-nowrap">
+                    Lanjut Bayar
+                </button>
+                @endif
             </div>
         </div>
         @empty
@@ -127,5 +139,6 @@
     </section>
 
     @include('order.detailorder')
+    @include('order.payment_modal')
 </div>
 @endsection

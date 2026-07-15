@@ -11,10 +11,10 @@
                 <div class="bg-white p-8 rounded-xl border border-gray-100 shadow-sm">
                     <h2 class="font-bold text-xl mb-6">Pemesanan</h2>
                     <div class="space-y-4">
-                        <div class="flex"><span class="w-40 text-gray-500">Nama</span> <span>: <strong>Valentino Rossi</strong></span></div>
-                        <div class="flex"><span class="w-40 text-gray-500">No. whatsapp</span> <span>: <strong>089675435567</strong></span></div>
-                        <div class="flex"><span class="w-40 text-gray-500">No. KTP</span> <span>: <strong>3478210</strong></span></div>
-                        <div class="flex"><span class="w-40 text-gray-500">No. SIM</span> <span>: <strong>09735289</strong></span></div>
+                        <div class="flex"><span class="w-40 text-gray-500">Nama</span> <span>: <strong>{{ auth()->user()->name }}</strong></span></div>
+                        <div class="flex"><span class="w-40 text-gray-500">No. whatsapp</span> <span>: <strong>{{ auth()->user()->whatsapp ?? '-' }}</strong></span></div>
+                        <div class="flex"><span class="w-40 text-gray-500">No. KTP</span> <span>: <strong>{{ auth()->user()->ktp ?? '-' }}</strong></span></div>
+                        <div class="flex"><span class="w-40 text-gray-500">No. SIM</span> <span>: <strong>{{ auth()->user()->sim ?? '-' }}</strong></span></div>
                     </div>
                     <p class="text-xs text-gray-400 mt-6">Kamu bisa mengubah email lewat profilmu di menu Akun.</p>
                 </div>
@@ -101,16 +101,24 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                     <h2 class="font-bold text-gray-800 mb-4">Ringkasan transaksi</h2>
                     <div class="space-y-3 text-sm mb-4">
-                        <div class="flex justify-between text-gray-600"><span>Harga</span> <span>Rp75.000</span></div>
+                        <div class="flex justify-between text-gray-600"><span>Harga</span> <span>Rp{{ number_format($product->harga_per_hari, 0, ',', '.') }} / hari</span></div>
                         <div class="flex justify-between text-gray-600"><span>Diskon</span> <span>-</span></div>
                     </div>
                     <div class="flex justify-between font-bold text-base border-t border-gray-100 pt-4 text-gray-900">
                         <span>Total harga</span> 
-                        <span>Rp75.000</span>
+                        <span>Rp{{ number_format($product->harga_per_hari * (int) request('durasi', 1), 0, ',', '.') }}</span>
                     </div>
-                    <button class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl mt-6 hover:bg-blue-700 transition duration-200 shadow-sm shadow-blue-200">
-                        Bayar Sekarang
-                    </button>
+                    <form action="{{ route('booking.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="tanggal_sewa" value="{{ request('tanggal_sewa') }}">
+                        <input type="hidden" name="durasi" value="{{ request('durasi', 1) }}">
+                        <input type="hidden" name="no_ktp" value="{{ auth()->user()->ktp }}">
+                        <input type="hidden" name="no_sim" value="{{ auth()->user()->sim }}">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl mt-6 hover:bg-blue-700 transition duration-200 shadow-sm shadow-blue-200">
+                            Bayar Sekarang
+                        </button>
+                    </form>
                 </div>
             </div>
 
