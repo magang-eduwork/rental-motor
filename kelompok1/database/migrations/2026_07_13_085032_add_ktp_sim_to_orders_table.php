@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
+            $table->foreignId('product_id')->nullable()->constrained()->onDelete('set null')->after('user_id');
             // Menambahkan kolom setelah kolom 'no_wa'
             $table->string('no_ktp')->after('no_wa')->nullable();
             $table->string('no_sim')->after('no_ktp')->nullable();
@@ -24,8 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            // Menghapus kolom jika migrasi di-rollback
-            $table->dropColumn(['no_ktp', 'no_sim']);
+            $table->dropForeign(['product_id']);
+            $table->dropColumn(['product_id', 'no_ktp', 'no_sim']);
         });
     }
 };

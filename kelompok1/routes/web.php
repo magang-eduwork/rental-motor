@@ -28,7 +28,30 @@ Route::get('/kendaraan', function () {
     $products = $query->get();
     $tipes = Product::select('tipe')->distinct()->pluck('tipe');
 
-    return view('kendaraan', compact('products', 'tipes'));
+    // Cek booking kendaraan untuk tanggal sewa yang dipilih
+    $tanggalSewa = request('tanggal_sewa', date('Y-m-d', strtotime('+1 day')));
+    $jamSewa = request('jam_sewa', '08:00');
+    $durasi = (int) request('durasi', 1);
+
+    try {
+        $reqStart = \Illuminate\Support\Carbon::parse($tanggalSewa . ' ' . $jamSewa);
+        $reqEnd = $reqStart->copy()->addDays($durasi);
+    } catch (\Exception $e) {
+        $reqStart = \Illuminate\Support\Carbon::tomorrow()->setTime(8, 0);
+        $reqEnd = $reqStart->copy()->addDays(1);
+    }
+
+    $bookedProductIds = \App\Models\Order::whereNotIn('status', ['Batal', 'batal'])
+        ->where(function ($q) use ($reqStart, $reqEnd) {
+            $q->where('tanggal_sewa', '<', $reqEnd)
+              ->where('tanggal_selesai', '>', $reqStart);
+        })
+        ->pluck('product_id')
+        ->filter()
+        ->unique()
+        ->toArray();
+
+    return view('kendaraan', compact('products', 'tipes', 'bookedProductIds'));
 })->name('kendaraan');
 
 // --- Rute Terproteksi (Login Required) ---
@@ -53,6 +76,7 @@ Route::middleware('auth')->group(function () {
     // Order Management
     Route::prefix('daftar-pesanan')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('order.index');
+        Route::post('/{id}/pay', [OrderController::class, 'pay'])->name('order.pay');
         Route::get('/{id}', [OrderController::class, 'show'])->name('order.show');
     });
 });

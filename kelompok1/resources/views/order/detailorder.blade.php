@@ -17,7 +17,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
                 <p class="font-bold text-lg" x-text="selectedOrder ? selectedOrder.nama_motor : 'Memuat...'"></p>
-                <img src="https://i.ibb.co.com/VYfhgqm4/image-44.png" alt="Motor" class="w-full mt-4 rounded-2xl bg-gray-50 object-cover h-48">
+                <img :src="selectedOrder && selectedOrder.product && selectedOrder.product.image_url ? 
+                           (selectedOrder.product.image_url.startsWith('http') ? selectedOrder.product.image_url : '/' + selectedOrder.product.image_url) : 
+                           'https://i.ibb.co.com/VYfhgqm4/image-44.png'" 
+                     alt="Motor" 
+                     class="w-full mt-4 rounded-2xl bg-gray-50 object-cover h-48">
             </div>
 
             <div class="space-y-4">

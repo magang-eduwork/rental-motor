@@ -16,7 +16,8 @@ class OrderController extends Controller
      */
     public function index(): View
     {
-        $orders = Order::where('user_id', Auth::id())
+        $orders = Order::with('product')
+                        ->where('user_id', Auth::id())
                         ->latest()
                         ->paginate(10);
         
@@ -48,5 +49,37 @@ class OrderController extends Controller
             \Log::error('Error fetching order: ' . $e->getMessage());
             return response()->json(['message' => 'Terjadi kesalahan server'], 500);
         }
+    }
+
+    /**
+     * Memproses pembayaran pesanan.
+     */
+    public function pay(\Illuminate\Http\Request $request, $id)
+    {
+        $request->validate([
+            'metode_pembayaran' => 'required|string|in:Transfer,Tunai,QRIS',
+        ]);
+
+        $order = Order::findOrFail($id);
+
+        // Keamanan: Pastikan user hanya bisa membayar pesanan miliknya sendiri
+        if ((int)$order->user_id !== (int)Auth::id()) {
+            abort(403, 'Akses ditolak');
+        }
+
+        // Simpan data pembayaran ke database
+        \App\Models\Payment::create([
+            'order_id'          => $order->id,
+            'jumlah_bayar'      => (int)$order->harga,
+            'metode_pembayaran' => $request->metode_pembayaran,
+            'status_pembayaran' => $request->metode_pembayaran === 'Tunai' ? 'pending' : 'lunas',
+        ]);
+
+        // Update status order ke 'Selesai' untuk menandakan pembayaran sukses / diterima
+        $order->status = 'Selesai';
+        $order->save();
+
+        return redirect()->route('order.index')
+            ->with('success', 'Pembayaran berhasil dikonfirmasi! Selamat berkendara.');
     }
 }
