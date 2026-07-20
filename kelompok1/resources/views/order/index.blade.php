@@ -15,7 +15,7 @@
         @forelse($orders as $order)
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6">
             <div class="w-full md:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
-                <img src="{{ $order->product && $order->product->image_url ? (Str::startsWith($order->product->image_url, ['http://', 'https://']) ? $order->product->image_url : asset($order->product->image_url)) : 'https://i.ibb.co.com/VYfhgqm4/image-44.png' }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
+                <img src="https://i.ibb.co.com/VYfhgqm4/image-44.png" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
@@ -33,7 +33,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 uppercase">Status</p>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $order->status == 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ in_array(strtolower($order->status), ['berhasil', 'selesai', 'success']) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
                         {{ $order->status }}
                     </span>
                 </div>
@@ -64,6 +64,8 @@
                     class="w-full text-center bg-indigo-600 text-white px-6 py-2 rounded-full font-bold hover:bg-indigo-700 transition cursor-pointer whitespace-nowrap">
                     Detail
                 </button>
+                
+                {{-- Validasi Tombol Bayar: Hanya muncul jika statusnya memang masih pending --}}
                 @if(in_array(strtolower($order->status), ['pending', 'belum bayar']))
                 <button 
                     type="button"
@@ -141,4 +143,58 @@
     @include('order.detailorder')
     @include('order.payment_modal')
 </div>
+
+{{-- SCRIPT INTEGRASI MIDTRANS SNAP DENGAN CALLBACK INTERNAL --}}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script>
+    function triggerMidtransPayment(snapToken, orderId) {
+        if (!snapToken) {
+            window.location.reload();
+            return;
+        }
+
+        window.snap.pay(snapToken, {
+            onSuccess: function(result) {
+                // Tembak perubahan status lokal secara instan tanpa perlu menunggu webhook
+                updateOrderStatusLocal(orderId, 'success');
+            },
+            onPending: function(result) {
+                alert("Menunggu penyelesaian pembayaran Anda.");
+                window.location.reload();
+            },
+            onError: function(result) {
+                alert("Pembayaran gagal, silakan coba lagi.");
+                window.location.reload();
+            },
+            onClose: function() {
+                alert('Anda menutup halaman pembayaran sebelum selesai.');
+            }
+        });
+    }
+
+    // Fungsi pembantu AJAX ke backend
+    function updateOrderStatusLocal(orderId, status) {
+        if (!orderId) return;
+        
+        fetch('/daftar-pesanan/' + orderId + '/update-status-lokal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ status: status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Pembayaran sukses diterima!');
+            }
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            window.location.reload();
+        });
+    }
+</script>
 @endsection

@@ -159,6 +159,8 @@
                         </svg>
                         <span>{{ $product->plat_nomor }}</span>
                     </div>
+                    
+                    {{-- KOREKSI: Pengecekan diubah dari menggunakan nama_motor menjadi menggunakan id produk --}}
                     @if(in_array($product->id, $bookedProductIds))
                         <span class="k-card-status k-card-status--unavailable bg-red-100 text-red-700">
                             Sudah di-booking
@@ -178,14 +180,13 @@
                     </div>
 
                     {{-- Tombol Booking --}}
+                    {{-- KOREKSI: Pengecekan diubah dari menggunakan nama_motor menjadi menggunakan id produk --}}
                     @if(in_array($product->id, $bookedProductIds))
                         <span class="k-book-btn k-book-btn--disabled" title="Sudah di-booking pada tanggal ini">Sudah di-booking</span>
                     @else
                         @auth
                             @if($product->status === 'tersedia')
-                                {{-- Kita arahkan ke rute checkout dan mengirimkan parameter filter via URL --}}
-                                <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" 
-                                class="k-book-btn">
+                                <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" class="k-book-btn">
                                     Booking
                                 </a>
                             @else
@@ -202,25 +203,25 @@
     @endif
 </div>
 
-    {{-- Terms Section --}}
-    <section class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat & Ketentuan Rental Motor</h2>
-            <p class="text-gray-600 mb-8">
-                Transparansi adalah kunci. Pastikan Anda memenuhi beberapa persyaratan dasar sebelum melakukan pemesanan.
-            </p>
-            <ol class="list-decimal list-inside space-y-4 text-gray-700">
-                <li>Lakukan pemesanan minimal <strong>1×24 jam</strong> sebelum waktu penggunaan. Setelah pesanan dikonfirmasi, penyewa wajib melakukan konfirmasi pengambilan motor melalui nomor whatsapp atau datang ke lokasi ED.RENT.</li>
-                <li>Membawa <strong>2 kartu identitas</strong> (SIM A, KK, KTP, ID Kerja atau ID Pelajar).</li>
-                <li>Menyertakan akun sosial media dan <strong>nomor whatsapp</strong> yang aktif.</li>
-                <li>Pada saat serah terima kendaraan, pihak penyedia rental akan melakukan <strong>pengecekan keaslian data</strong> dan kondisi kendaraan.</li>
-                <li>Pihak penyedia rental <strong>berhak membatalkan</strong> apabila data tidak sesuai dan syarat sewa tidak dapat dilengkapi.</li>
-                <li>Apabila pembayaran telah selesai dan kendaraan yang dipesan tidak tersedia, penyewa <strong>berhak memilih kendaraan lain</strong> yang tersedia tanpa dikenakan biaya tambahan.</li>
-            </ol>
-        </div>
-    </section>
+{{-- Terms Section --}}
+<section class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Syarat & Ketentuan Rental Motor</h2>
+        <p class="text-gray-600 mb-8">
+            Transparansi adalah kunci. Pastikan Anda memenuhi beberapa persyaratan dasar sebelum melakukan pemesanan.
+        </p>
+        <ol class="list-decimal list-inside space-y-4 text-gray-700">
+            <li>Lakukan pemesanan minimal <strong>1×24 jam</strong> sebelum waktu penggunaan. Setelah pesanan dikonfirmasi, penyewa wajib melakukan konfirmasi pengambilan motor melalui nomor whatsapp atau datang ke lokasi ED.RENT.</li>
+            <li>Membawa <strong>2 kartu identitas</strong> (SIM A, KK, KTP, ID Kerja atau ID Pelajar).</li>
+            <li>Menyertakan akun sosial media dan <strong>nomor whatsapp</strong> yang aktif.</li>
+            <li>Pada saat serah terima kendaraan, pihak penyedia rental akan melakukan <strong>pengecekan keaslian data</strong> dan kondisi kendaraan.</li>
+            <li>Pihak penyedia rental <strong>berhak membatalkan</strong> apabila data tidak sesuai dan syarat sewa tidak dapat dilengkapi.</li>
+            <li>Apabila pembayaran telah selesai dan kendaraan yang dipesan tidak tersedia, penyewa <strong>berhak memilih kendaraan lain</strong> yang tersedia tanpa dikenakan biaya tambahan.</li>
+        </ol>
+    </div>
+</section>
 
-    @endsection
+@endsection
 
 @push('scripts')
 <script>
