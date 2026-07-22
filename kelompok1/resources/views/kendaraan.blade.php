@@ -193,13 +193,26 @@
                                 <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
                             @endif
                         @else
-                            <a href="{{ route('login') }}" class="k-book-btn k-book-btn--guest">Login</a>
+                            @if($product->status === 'tersedia')
+                                <a href="{{ route('login') }}" class="k-book-btn">
+                                    Booking
+                                </a>
+                            @else
+                                <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
+                            @endif
                         @endauth
                     @endif
                 </div>
             </article>
             @endforeach
         </div>
+
+        {{-- Pagination Links --}}
+        @if($products->hasPages())
+            <div class="mt-8 mb-12 flex justify-center">
+                {{ $products->links() }}
+            </div>
+        @endif
     @endif
 </div>
 

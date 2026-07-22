@@ -87,6 +87,13 @@
         @endforelse
     </div>
 
+    {{-- Pagination Links --}}
+    @if($orders->hasPages())
+        <div class="mt-6 mb-10 flex justify-center">
+            {{ $orders->links() }}
+        </div>
+    @endif
+
     {{-- Pilihan Motor Terpopuler --}}
     <div class="border-t pt-16">
         <div class="flex justify-between items-end mb-8">

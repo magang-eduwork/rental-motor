@@ -32,7 +32,7 @@ Route::get('/kendaraan', function () {
         $query->where('nama_motor', 'like', '%' . request('cari') . '%');
     }
 
-    $products = $query->get();
+    $products = $query->paginate(12)->withQueryString();
     $tipes = Product::select('tipe')->distinct()->pluck('tipe');
 
     $tanggalSewa = request('tanggal_sewa', date('Y-m-d', strtotime('+1 day')));
