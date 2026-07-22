@@ -156,9 +156,15 @@
                         <strong>Rp{{ number_format($product->harga_per_hari, 0, ',', '.') }}</strong>
                         <span class="price-unit">/ hari</span>
                     </div>
-                    <a href="{{ route('kendaraan') }}" class="book-button" style="display: inline-block; text-align: center; text-decoration: none;">
-                        Booking
-                    </a>
+                    @auth
+                        <a href="{{ route('kendaraan') }}" class="book-button" style="display: inline-block; text-align: center; text-decoration: none;">
+                            Booking
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="book-button" style="display: inline-block; text-align: center; text-decoration: none;">
+                            Booking
+                        </a>
+                    @endauth
                 </div>
             </article>
             @endforeach
