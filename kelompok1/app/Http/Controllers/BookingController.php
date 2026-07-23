@@ -17,6 +17,11 @@ class BookingController extends Controller
         return view('booking.checkout', compact('product'));
     }
 
+    public function showVehicle(Product $product)
+    {
+        return view('order.vehicle-display', compact('product'));
+    }
+
     public function store(Request $request)
     {
         // 1. Validasi Input

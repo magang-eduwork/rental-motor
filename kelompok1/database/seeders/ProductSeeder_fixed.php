@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class ProductSeeder extends Seeder
+class ProductSeeder_fixed extends Seeder
 {
     /**
      * Run the database seeds.
@@ -22,9 +22,6 @@ class ProductSeeder extends Seeder
             ['nama_motor' => 'Honda Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 85000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1014 SC', 'image_url' => 'https://i.ibb.co.com/8LqFPNKL/Honda-Scoopy.jpg'],
             ['nama_motor' => 'Honda Genio', 'tipe' => 'Matic', 'harga_per_hari' => 80000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1015 GN', 'image_url' => 'https://i.ibb.co.com/4HDRdcr/Honda-Genio.webp'],
             ['nama_motor' => 'Honda PCX 160', 'tipe' => 'Matic', 'harga_per_hari' => 130000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1016 PX', 'image_url' => 'https://i.ibb.co.com/Ldbw0bPp/Honda-PCX-160.jpg'],
-            ['nama_motor' => 'Honda Stylo 160', 'tipe' => 'Matic', 'harga_per_hari' => 100000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1032 ST', 'image_url' => 'https://i.ibb.co.com/W4NW8fv3/Honda-Stylo-160.jpg'],
-            ['nama_motor' => 'Yamaha NMAX 155', 'tipe' => 'Matic', 'harga_per_hari' => 150000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1033 NM', 'image_url' => 'https://i.ibb.co.com/JFxbfxhZ/Yamaha-NMAX-155.jpg'],
-            ['nama_motor' => 'Yamaha Aerox 155', 'tipe' => 'Matic', 'harga_per_hari' => 150000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1034 AY', 'image_url' => 'https://i.ibb.co.com/1BbkM67/Yamaha-Aerox-155.jpg'],
             ['nama_motor' => 'Honda ADV 160', 'tipe' => 'Matic', 'harga_per_hari' => 140000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1017 AD', 'image_url' => 'https://i.ibb.co.com/wZ3NL9P9/Honda-ADV-160.jpg'],
             ['nama_motor' => 'Yamaha Mio M3', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1021 MM', 'image_url' => 'https://i.ibb.co.com/ynYhjsSF/Yamaha-Mio-M3.png'],
             ['nama_motor' => 'Yamaha Fazzio', 'tipe' => 'Matic', 'harga_per_hari' => 90000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1022 FZ', 'image_url' => 'https://i.ibb.co.com/7BGLvg6/Yamaha-Fazzio.png'],
@@ -67,10 +64,7 @@ class ProductSeeder extends Seeder
             ['nama_motor' => 'Honda CRF250 Rally', 'tipe' => 'Trail', 'harga_per_hari' => 250000, 'status' => 'tersedia', 'plat_nomor' => 'AB 4015 RY', 'image_url' => 'https://i.ibb.co.com/Txrb8Cfz/Honda-CRF250-Rally.webp'],
         ];
         foreach ($motors as $motor) {
-            \App\Models\Product::updateOrCreate(
-                ['nama_motor' => $motor['nama_motor']],
-                $motor
-            );
+            \App\Models\Product::create($motor);
         }
     }
 }
