@@ -61,6 +61,8 @@ Route::get('/kendaraan', function () {
     return view('kendaraan', compact('products', 'tipes', 'bookedProductIds'));
 })->name('kendaraan');
 
+Route::get('/kendaraan/{product}/detail', [BookingController::class, 'showVehicle'])->name('vehicle.display');
+
 // --- Rute Webhook Midtrans (Bebas CSRF & Wajib di Luar Auth) ---
 Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotification'])->name('midtrans.webhook');
 

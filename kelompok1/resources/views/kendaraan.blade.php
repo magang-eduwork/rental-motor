@@ -179,6 +179,10 @@
                         <span class="k-price-unit">/ hari</span>
                     </div>
 
+                        <a href="{{ route('vehicle.display', $product->id) }}" class="k-book-btn k-book-btn--secondary" style="margin-right: 0.5rem;">
+                            Detail
+                        </a>
+
                     {{-- Tombol Booking --}}
                     {{-- KOREKSI: Pengecekan diubah dari menggunakan nama_motor menjadi menggunakan id produk --}}
                     @if(in_array($product->id, $bookedProductIds))
