@@ -159,17 +159,10 @@
                         </svg>
                         <span>{{ $product->plat_nomor }}</span>
                     </div>
-                    
-                    {{-- KOREKSI: Pengecekan diubah dari menggunakan nama_motor menjadi menggunakan id produk --}}
-                    @if(in_array($product->id, $bookedProductIds))
-                        <span class="k-card-status k-card-status--unavailable bg-red-100 text-red-700">
-                            Sudah di-booking
-                        </span>
-                    @else
-                        <span class="k-card-status {{ $product->status === 'tersedia' ? 'k-card-status--available' : 'k-card-status--unavailable' }}">
-                            {{ ucfirst($product->status) }}
-                        </span>
-                    @endif
+
+                    <span class="k-card-status {{ $product->status === 'tersedia' ? 'k-card-status--available' : 'k-card-status--unavailable' }}">
+                        {{ $product->status === 'tersedia' ? 'Tersedia' : 'Tidak Tersedia' }}
+                    </span>
                 </div>
 
                 {{-- Harga & Booking --}}
@@ -179,46 +172,56 @@
                         <span class="k-price-unit">/ hari</span>
                     </div>
 
-                        <a href="{{ route('vehicle.display', $product->id) }}" class="k-book-btn k-book-btn--secondary" style="margin-right: 0.5rem;">
-                            Detail
-                        </a>
+                    <a href="{{ route('vehicle.display', $product->id) }}"
+                    class="k-book-btn k-book-btn--secondary"
+                    style="margin-right: 0.5rem;">
+                        Detail
+                    </a>
 
-                    {{-- Tombol Booking --}}
-                    {{-- KOREKSI: Pengecekan diubah dari menggunakan nama_motor menjadi menggunakan id produk --}}
-                    @if(in_array($product->id, $bookedProductIds))
-                        <span class="k-book-btn k-book-btn--disabled" title="Sudah di-booking pada tanggal ini">Sudah di-booking</span>
-                    @else
-                        @auth
-                            @if($product->status === 'tersedia')
-                                <a href="{{ route('booking.checkout', $product->id) }}?tanggal_sewa={{ request('tanggal_sewa', date('Y-m-d', strtotime('+1 day'))) }}&jam_sewa={{ request('jam_sewa', '08:00') }}&durasi={{ request('durasi', 1) }}" class="k-book-btn">
+                    @auth
+                        @if($product->status === 'tersedia')
+                            <form method="GET"
+                                action="{{ route('booking.checkout', $product->id) }}"
+                                onsubmit="return syncBookingForm(this)"
+                                class="inline">
+
+                                <input type="hidden" name="tanggal_sewa" class="inp-tanggal">
+                                <input type="hidden" name="jam_sewa" class="inp-jam">
+                                <input type="hidden" name="durasi" class="inp-durasi">
+
+                                <button type="submit" class="k-book-btn">
                                     Booking
-                                </a>
-                            @else
-                                <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
-                            @endif
+                                </button>
+                            </form>
                         @else
-                            @if($product->status === 'tersedia')
-                                <a href="{{ route('login') }}" class="k-book-btn">
-                                    Booking
-                                </a>
-                            @else
-                                <span class="k-book-btn k-book-btn--disabled" title="Tidak tersedia">Disewa</span>
-                            @endif
-                        @endauth
+                            <span class="k-book-btn k-book-btn--disabled">
+                                Disewa
+                            </span>
+                        @endif
+                    @else
+                        @if($product->status === 'tersedia')
+                            <a href="{{ route('login') }}" class="k-book-btn">
+                                Booking
+                            </a>
+                        @else
+                            <span class="k-book-btn k-book-btn--disabled">
+                                Disewa
+                            </span>
+                        @endif
+                    @endauth
+                </div>
+                            </article>
+                            @endforeach
+                        </div>
+
+                        {{-- Pagination Links --}}
+                        @if($products->hasPages())
+                            <div class="mt-8 mb-12 flex justify-center">
+                                {{ $products->links() }}
+                            </div>
+                        @endif
                     @endif
                 </div>
-            </article>
-            @endforeach
-        </div>
-
-        {{-- Pagination Links --}}
-        @if($products->hasPages())
-            <div class="mt-8 mb-12 flex justify-center">
-                {{ $products->links() }}
-            </div>
-        @endif
-    @endif
-</div>
 
 {{-- Terms Section --}}
 <section class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">

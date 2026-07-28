@@ -1,9 +1,10 @@
 @extends('layouts.app') 
 
+
 @section('content')
 <div class="container mx-auto py-16 px-6" 
-     x-data="{ open: false, selectedOrder: null, paymentOpen: false, selectedOrderForPayment: null, selectedPaymentMethod: '' }" 
-     x-cloak>
+    x-data="orderPage()"
+    x-cloak>
     
     <div class="mb-10">
         <h1 class="text-3xl font-bold text-gray-900">Daftar Pesanan</h1>
@@ -15,7 +16,7 @@
         @forelse($orders as $order)
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6">
             <div class="w-full md:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
-                <img src="https://i.ibb.co.com/VYfhgqm4/image-44.png" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
+                <img src="{{ $order->product->image_url }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
@@ -32,8 +33,14 @@
                     <p class="font-bold text-gray-900">{{ $order->tanggal_booking->format('d-m-Y') }}</p>
                 </div>
                 <div>
-                    <p class="text-xs text-gray-500 uppercase">Status</p>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold {{ in_array(strtolower($order->status), ['berhasil', 'selesai', 'success']) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                    <p class="text-xs text-gray-500 uppercase">Status Pembayaran</p>
+                    <span>
+                        {{ $order->payment?->status_pembayaran ?? 'Belum Ada' }}
+                    </span>
+                </div>
+                 <div>
+                    <p class="text-xs text-gray-500 uppercase">Status Kendaraan</p>
+                    <span>
                         {{ $order->status }}
                     </span>
                 </div>
@@ -66,15 +73,16 @@
                 </button>
                 
                 {{-- Validasi Tombol Bayar: Hanya muncul jika statusnya memang masih pending --}}
-                @if(in_array(strtolower($order->status), ['pending', 'belum bayar']))
-                <button 
+                @if(!$order->payment || $order->payment->status_pembayaran !== 'success')
+                <button
                     type="button"
-                    @click="
-                        selectedOrderForPayment = { id: '{{ $order->id }}', kode_booking: '{{ $order->kode_booking }}', nama_motor: '{{ $order->nama_motor }}', harga: '{{ $order->harga }}' };
-                        selectedPaymentMethod = '';
-                        paymentOpen = true;
-                    "
-                    class="w-full text-center bg-emerald-600 text-white px-6 py-2 rounded-full font-bold hover:bg-emerald-700 transition cursor-pointer whitespace-nowrap">
+                    class="w-full text-center bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition cursor-pointer whitespace-nowrap"
+                    @click="openPayment(
+                        {{ $order->id }},
+                        '{{ $order->nama_motor }}',
+                        {{ $order->harga }},
+                        '{{ $order->kode_booking }}'
+                    )">
                     Lanjut Bayar
                 </button>
                 @endif
@@ -154,7 +162,32 @@
 {{-- SCRIPT INTEGRASI MIDTRANS SNAP DENGAN CALLBACK INTERNAL --}}
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 <script>
-    function triggerMidtransPayment(snapToken, orderId) {
+
+function orderPage() {
+    return {
+        open: false,
+        selectedOrder: null,
+
+        paymentOpen: false,
+        selectedOrderForPayment: null,
+        selectedPaymentMethod: '',
+
+        openPayment(orderId, namaMotor, harga, kodeBooking) {
+            this.selectedOrderForPayment = {
+                id: orderId,
+                nama_motor: namaMotor,
+                harga: harga,
+                kode_booking: kodeBooking
+            };
+
+            this.selectedPaymentMethod = '';
+            this.paymentOpen = true;
+        }
+    };
+
+}
+
+    window.triggerMidtransPayment = function(snapToken, orderId) {
         if (!snapToken) {
             window.location.reload();
             return;
@@ -163,7 +196,8 @@
         window.snap.pay(snapToken, {
             onSuccess: function(result) {
                 // Tembak perubahan status lokal secara instan tanpa perlu menunggu webhook
-                updateOrderStatusLocal(orderId, 'success');
+                // updateOrderStatusLocal(orderId);
+                window.location.reload();
             },
             onPending: function(result) {
                 alert("Menunggu penyelesaian pembayaran Anda.");
@@ -180,16 +214,16 @@
     }
 
     // Fungsi pembantu AJAX ke backend
-    function updateOrderStatusLocal(orderId, status) {
+    function updateOrderStatusLocal(orderId) {
         if (!orderId) return;
         
         fetch('/daftar-pesanan/' + orderId + '/update-status-lokal', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ status: status })
+            body: JSON.stringify({})
         })
         .then(response => response.json())
         .then(data => {
@@ -203,5 +237,6 @@
             window.location.reload();
         });
     }
+
 </script>
 @endsection

@@ -63,8 +63,8 @@
                 
                 <!-- Motor & Nama Info -->
                 <div class="flex items-center gap-4 min-w-[220px]">
-                    <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100 p-2">
-                        <i class="fa-solid fa-motorcycle text-gray-400 text-2xl"></i>
+                    <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-100">
+                        <img src="{{ asset($order->product->image_url) }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <span class="text-xs text-gray-400 font-medium block">Kendaraan Rental</span>
@@ -88,26 +88,48 @@
                 </div>
 
                 <!-- Status Pembayaran Dinamis -->
-                <div>
-                    <span class="text-xs text-gray-400 font-medium block mb-1">Status</span>
-                    @php
-                        $statusClean = strtolower($order->status);
-                        $badgeClass = 'bg-gray-100 text-gray-500';
-                        
-                        if (in_array($statusClean, ['lunas', 'success'])) {
-                            $badgeClass = 'bg-green-100 text-green-600';
-                        } elseif (in_array($statusClean, ['batal', 'cancel'])) {
-                            $badgeClass = 'bg-red-100 text-red-500';
-                        } elseif ($statusClean === 'sedang dibawa') {
-                            $badgeClass = 'bg-amber-100 text-amber-600';
-                        } elseif ($statusClean === 'sudah kembali') {
-                            $badgeClass = 'bg-blue-100 text-blue-600';
-                        }
-                    @endphp
-                    <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider {{ $badgeClass }}">
-                        {{ $order->status }}
-                    </span>
-                </div>
+                <div class="flex items-center gap-4">
+
+    <!-- Pembayaran -->
+    <div>
+        <span class="text-xs text-gray-400 font-medium block mb-1">
+            Status Pembayaran
+        </span>
+
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
+            @switch($order->payment?->status_pembayaran)
+                @case('success')
+                    bg-green-100 text-green-700
+                    @break
+
+                @case('pending')
+                    bg-yellow-100 text-yellow-700
+                    @break
+
+                @case('failed')
+                    bg-red-100 text-red-700
+                    @break
+
+                @default
+                    bg-gray-100 text-gray-700
+            @endswitch
+        ">
+            {{ $order->payment?->status_pembayaran ?? 'Belum Bayar' }}
+        </span>
+    </div>
+
+    <!-- Kendaraan -->
+             <div>
+                <span class="text-xs text-gray-400 font-medium block mb-1">
+                   Status Kendaraan
+                </span>
+
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                    {{ $order->status }}
+                </span>
+            </div>
+
+        </div>
 
                 <!-- Harga -->
                 <div>

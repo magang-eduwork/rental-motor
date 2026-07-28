@@ -28,17 +28,23 @@ class BookingController extends Controller
         $validated = $request->validate([
             'product_id'    => ['required', 'exists:products,id'],
             'tanggal_sewa'  => ['required', 'date', 'after_or_equal:today'],
+            'jam_sewa'      => ['required'],
             'durasi'        => ['required', 'integer', 'min:1', 'max:30'],
             'no_ktp'        => ['required', 'string', 'max:20'],
             'no_sim'        => ['required', 'string', 'max:20'],
         ]);
 
         $product = Product::findOrFail($validated['product_id']);
+        if ($product->status !== 'tersedia') {
+            return back()
+                ->withInput()
+                ->with('error', 'Motor sedang disewa dan tidak dapat dibooking.');
+        }
         $user    = Auth::user();
 
         // 2. Kalkulasi Tanggal & Harga
         // Karena form tidak punya jam_sewa, kita gunakan default '08:00:00'
-        $tanggalSewa    = $validated['tanggal_sewa'] . ' 08:00:00';
+        $tanggalSewa = $validated['tanggal_sewa'].' '.$validated['jam_sewa'].':00';
         $durasi         = (int) $validated['durasi'];
         $tanggalSelesai = date('Y-m-d H:i:s', strtotime($tanggalSewa . ' +' . $durasi . ' days'));
         $totalHarga     = $product->harga_per_hari * $durasi;
@@ -59,7 +65,7 @@ class BookingController extends Controller
                 'tanggal_sewa'    => $tanggalSewa,
                 'tanggal_selesai' => $tanggalSelesai,
                 'durasi_hari'     => $durasi,
-                'status'          => 'pending',
+                'status'          => 'Pending',
                 'harga'           => $totalHarga,
             ]);
 
