@@ -63,8 +63,8 @@
                 
                 <!-- Motor & Nama Info -->
                 <div class="flex items-center gap-4 min-w-[220px]">
-                    <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-100">
-                        <img src="{{ asset($order->product->image_url) }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0">
+                        <img src="{{ $order->product?->image_url ? asset($order->product->image_url) : 'https://i.ibb.co.com/VYfhgqm4/image-44.png' }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <span class="text-xs text-gray-400 font-medium block">Kendaraan Rental</span>
@@ -87,49 +87,30 @@
                     </span>
                 </div>
 
-                <!-- Status Pembayaran Dinamis -->
+                <!-- Status Pembayaran & Kendaraan -->
                 <div class="flex items-center gap-4">
+                    <!-- Pembayaran -->
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Status Pembayaran</span>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
+                            @switch($order->payment?->status_pembayaran)
+                                @case('success') bg-green-100 text-green-700 @break
+                                @case('pending') bg-yellow-100 text-yellow-700 @break
+                                @case('failed') bg-red-100 text-red-700 @break
+                                @default bg-gray-100 text-gray-700
+                            @endswitch">
+                            {{ $order->payment?->status_pembayaran ?? 'Belum Bayar' }}
+                        </span>
+                    </div>
 
-    <!-- Pembayaran -->
-    <div>
-        <span class="text-xs text-gray-400 font-medium block mb-1">
-            Status Pembayaran
-        </span>
-
-        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
-            @switch($order->payment?->status_pembayaran)
-                @case('success')
-                    bg-green-100 text-green-700
-                    @break
-
-                @case('pending')
-                    bg-yellow-100 text-yellow-700
-                    @break
-
-                @case('failed')
-                    bg-red-100 text-red-700
-                    @break
-
-                @default
-                    bg-gray-100 text-gray-700
-            @endswitch
-        ">
-            {{ $order->payment?->status_pembayaran ?? 'Belum Bayar' }}
-        </span>
-    </div>
-
-    <!-- Kendaraan -->
-             <div>
-                <span class="text-xs text-gray-400 font-medium block mb-1">
-                   Status Kendaraan
-                </span>
-
-                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                    {{ $order->status }}
-                </span>
-            </div>
-
-        </div>
+                    <!-- Kendaraan -->
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Status Kendaraan</span>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                            {{ $order->status }}
+                        </span>
+                    </div>
+                </div>
 
                 <!-- Harga -->
                 <div>
@@ -175,12 +156,14 @@
         <!-- Informasi Detail Pesanan di Dalam Modal -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-2xl mb-6 border border-gray-100 items-center">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center border border-gray-200 shadow-sm p-2">
-                    <i class="fa-solid fa-motorcycle text-blue-600 text-xl"></i>
+                <!-- Kotak Gambar Kendaraan Di dalam Modal -->
+                <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 bg-white flex-shrink-0">
+                    <img id="modalGambarMotor" src="" alt="Motor" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h4 id="modalNamaMotor" class="font-bold text-gray-800 text-base"></h4>
-                    <span class="text-xs text-blue-600 font-medium">Matic / Bebek</span>
+                    <!-- Tipe kendaraan dinamis tersinkronisasi database -->
+                    <span id="modalTipeKendaraan" class="text-xs text-blue-600 font-medium"></span>
                 </div>
             </div>
             <div class="space-y-1.5 text-sm">
@@ -237,13 +220,8 @@
 
     function formatDateTimeLocal(dateString) {
         if (!dateString) return '';
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
+        // KOREKSI: Mengambil string secara presisi dari database tanpa konversi zona waktu browser
+        return dateString.substring(0, 16).replace(' ', 'T');
     }
 
     function openUpdateModal(order) {
@@ -254,7 +232,24 @@
         document.getElementById('modalBookingCode').innerText = order.kode_booking;
         document.getElementById('modalTglBooking').innerText = order.tanggal_booking ? new Date(order.tanggal_booking).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-';
         
-        // Masukkan nilai tanggal sewa dan selesai ke form input datetime-local
+        // Sinkronisasi Tipe Kendaraan dari Database melalui relasi product
+        const tipeElement = document.getElementById('modalTipeKendaraan');
+        if (order.product && order.product.tipe) {
+            tipeElement.innerText = order.product.tipe;
+        } else {
+            tipeElement.innerText = '-';
+        }
+
+        // Sinkronisasi Gambar Kendaraan pada Modal
+        const imgElement = document.getElementById('modalGambarMotor');
+        if (order.product && order.product.image_url) {
+            let imageUrl = order.product.image_url;
+            imgElement.src = imageUrl.startsWith('http') ? imageUrl : '/' + imageUrl;
+        } else {
+            imgElement.src = 'https://i.ibb.co.com/VYfhgqm4/image-44.png';
+        }
+
+        // Masukkan nilai tanggal sewa dan selesai ke form input datetime-local secara presisi
         document.getElementById('modalTanggalSewa').value = formatDateTimeLocal(order.tanggal_sewa);
         document.getElementById('modalTanggalSelesai').value = formatDateTimeLocal(order.tanggal_selesai);
         
