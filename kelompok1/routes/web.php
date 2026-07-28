@@ -47,18 +47,8 @@ Route::get('/kendaraan', function () {
         $reqEnd = $reqStart->copy()->addDays(1);
     }
 
-    $bookedProductIds = Order::where('user_id', Auth::id())
-        ->whereNotIn('status', ['Batal', 'batal'])
-        ->where(function ($q) use ($reqStart, $reqEnd) {
-            $q->where('tanggal_sewa', '<', $reqEnd)
-              ->where('tanggal_selesai', '>', $reqStart);
-        })
-        ->pluck('nama_motor') 
-        ->filter()
-        ->unique()
-        ->toArray();
 
-    return view('kendaraan', compact('products', 'tipes', 'bookedProductIds'));
+    return view('kendaraan', compact('products', 'tipes'));
 })->name('kendaraan');
 
 Route::get('/kendaraan/{product}/detail', [BookingController::class, 'showVehicle'])->name('vehicle.display');
@@ -73,20 +63,20 @@ Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handleNotif
 Route::middleware('auth')->group(function () {
     
     // Kelola Profil Pelanggan
-    Route::controller(ProfileController::class)->group(function () {
+        Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
     
     // Alur Transaksi & Pemesanan Kendaraan
-    Route::prefix('booking')->group(function () {
+        Route::prefix('booking')->group(function () {
         Route::get('/checkout/{product}', [BookingController::class, 'create'])->name('booking.checkout');
         Route::post('/store', [BookingController::class, 'store'])->name('booking.store');
     });
 
     // Manajemen Order Sisi Pelanggan
-    Route::prefix('daftar-pesanan')->group(function () {
+        Route::prefix('daftar-pesanan')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('order.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('order.show');
         Route::post('/{id}/pay', [OrderController::class, 'pay'])->name('order.pay');

@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Mendaftarkan alias middleware admin agar bisa digunakan di routes/web.php
+         $middleware->validateCsrfTokens(except: [
+            'midtrans/webhook',
+        ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);

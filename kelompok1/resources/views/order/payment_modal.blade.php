@@ -1,6 +1,5 @@
 <div x-show="paymentOpen" 
      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" 
-     style="display: none;"
      x-cloak>
     
     <div @click.away="paymentOpen = false" 
@@ -141,7 +140,7 @@
                                 
                                 // Memanggil fungsi global yang ada di index.blade.php
                                 if (typeof triggerMidtransPayment === 'function') {
-                                    triggerMidtransPayment(data.snap_token);
+                                    window.triggerMidtransPayment(data.snap_token, orderId);
                                 } else {
                                     alert('Fungsi pembayaran tidak ditemukan.');
                                 }

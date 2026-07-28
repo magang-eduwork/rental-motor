@@ -22,9 +22,10 @@ class OrderController extends Controller
     public function index(): View
     {
         // Mengambil order milik user yang sedang login
-        $orders = Order::where('user_id', Auth::id())
-                        ->latest()
-                        ->paginate(10);
+        $orders = Order::with(['product', 'payment'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
         
         // Tetap melimit 4 produk opsional untuk kebutuhan section rekomendasi di view jika diperlukan
         $products = Product::limit(4)->get(); 
@@ -86,7 +87,7 @@ class OrderController extends Controller
                 );
 
                 // Update status pesanan
-                $order->status = 'Menunggu Pembayaran';
+                $order->status = 'Pending';
                 $order->save();
 
                 return response()->json([
@@ -97,10 +98,10 @@ class OrderController extends Controller
             }
 
             // --- STRATEGI 2: JIKA METODE DIGITAL (TRANSFER BANK / QRIS VIA MIDTRANS) ---
-            Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-            Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
-            Config::$isSanitized = true;
-            Config::$is3ds = true;
+            Config::$serverKey = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.is_production');
+            Config::$isSanitized = config('midtrans.is_sanitized');
+            Config::$is3ds = config('midtrans.is_3ds');
 
             // PERBAIKAN SOLUSI SSL: Kosongkan curlOptions bawaan SDK untuk menghindari error 'Undefined array key 10023'
             Config::$curlOptions = [];
@@ -115,11 +116,12 @@ class OrderController extends Controller
                 ]);
             }
 
+            $midtransOrderId = $order->kode_booking . '-' . time();
             $params = [
                 'transaction_details' => [
-                    'order_id' => $order->kode_booking . '-' . time(), // Suffix waktu agar order_id Midtrans selalu unik jika di-retry
-                    'gross_amount' => (int)$order->harga,
-                ],
+                'order_id' => $midtransOrderId,
+                'gross_amount' => (int) $order->harga,
+             ],
                 'customer_details' => [
                     'first_name' => $order->nama_pemesan ?? $order->user->name,
                     'email' => $order->user->email ?? 'customer@mail.com',
@@ -138,13 +140,21 @@ class OrderController extends Controller
             // Dapatkan token Snap dari API Midtrans Sandbox
             $snapToken = Snap::getSnapToken($params);
 
+            Log::info('Snap Token', [
+                'token' => $snapToken,
+                'order_id' => $midtransOrderId,
+            ]);
+
             // Menggunakan updateOrCreate untuk mencegah penumpukan baris baru di tabel payments pada order_id yang sama
             Payment::updateOrCreate(
                 ['order_id' => $order->id],
                 [
-                    'jumlah_bayar'      => (int)$order->harga,
+                    'midtrans_order_id' => $midtransOrderId,
+                    'jumlah_bayar' => (int) $order->harga,
                     'metode_pembayaran' => $request->metode_pembayaran,
-                    'status_pembayaran' => 'pending', // Menunggu proses penyelesaian di sisi gateway
+                    'payment_type' => null,
+                    'midtrans_transaction_id' => null,
+                    'status_pembayaran' => 'pending',
                 ]
             );
 
@@ -164,40 +174,32 @@ class OrderController extends Controller
     /**
      * Memperbarui status pesanan secara instan melalui callback lokal front-end.
      */
-    public function updateStatusLokal(Request $request, $id): JsonResponse
-    {
-        $request->validate([
-            'status' => 'required|string',
-        ]);
+    // public function updateStatusLokal(Request $request, $id): JsonResponse {
 
-        try {
-            $order = Order::findOrFail($id);
+    //     try {
+    //         $order = Order::findOrFail($id);
 
-            // Keamanan: Pastikan user hanya bisa merubah pesanan miliknya sendiri
-            if ((int)$order->user_id !== (int)Auth::id()) {
-                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-            }
+    //         // Keamanan: Pastikan user hanya bisa merubah pesanan miliknya sendiri
+    //         if ((int)$order->user_id !== (int)Auth::id()) {
+    //             return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+    //         }
 
-            // Update status pada tabel orders
-            // Menyesuaikan string dengan pengecekan 'success' pada template Blade Anda
-            $order->status = $request->status; // Menyimpan nilai 'success'
-            $order->save();
+    //         // Update status pada tabel orders
+    //         // Menyesuaikan string dengan pengecekan 'success' pada template Blade Anda
+    //         Payment::where('order_id', $order->id)->update([
+    //             'status_pembayaran' => 'success'
+    //         ]);
 
-            // Opsional: Update status pada tabel payments jika data tercatat di sana
-            Payment::where('order_id', $order->id)->update([
-                'status_pembayaran' => 'success'
-            ]);
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Pembayaran berhasil.'
+    //         ]); // Menyimpan nilai 'success'
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Status pesanan berhasil diperbarui secara lokal.'
-            ]);
-
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
-        } catch (\Exception $e) {
-            Log::error('Error update status lokal: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal memperbarui status'], 500);
-        }
-    }
+    //     } catch (ModelNotFoundException $e) {
+    //         return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error update status lokal: ' . $e->getMessage());
+    //         return response()->json(['success' => false, 'message' => 'Gagal memperbarui status'], 500);
+    //     }
+    // }
 }

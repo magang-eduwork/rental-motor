@@ -112,6 +112,7 @@
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                         <input type="hidden" name="tanggal_sewa" value="{{ request('tanggal_sewa') }}">
+                        <input type="hidden" name="jam_sewa" value="{{ request('jam_sewa') }}">
                         <input type="hidden" name="durasi" value="{{ request('durasi', 1) }}">
                         <input type="hidden" name="no_ktp" value="{{ auth()->user()->ktp }}">
                         <input type="hidden" name="no_sim" value="{{ auth()->user()->sim }}">

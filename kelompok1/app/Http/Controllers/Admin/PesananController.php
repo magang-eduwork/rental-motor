@@ -13,7 +13,7 @@ class PesananController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::query();
+        $query = Order::with(['product', 'payment']);
 
         // 1. Filter berdasarkan Status
         if ($request->filled('status') && $request->status !== 'Semua') {
@@ -67,6 +67,18 @@ class PesananController extends Controller
         $order->tanggal_sewa = $request->tanggal_sewa;
         $order->tanggal_selesai = $request->tanggal_selesai;
         $order->save();
+
+        if ($request->status === 'Sedang dibawa') {
+            $order->product->update([
+                'status' => 'tidak_tersedia'
+            ]);
+        }
+
+        if ($request->status === 'Sudah kembali' || $request->status === 'Batal') {
+            $order->product->update([
+                'status' => 'tersedia'
+            ]);
+        }
 
         return response()->json([
             'success' => true,
