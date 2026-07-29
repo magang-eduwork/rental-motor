@@ -126,7 +126,7 @@
             </form>
 
             <!-- Divider -->
-            <div class="my-8 flex items-center">
+            <!-- <div class="my-8 flex items-center">
 
                 <div class="flex-1 h-px bg-gray-300"></div>
 
@@ -136,15 +136,15 @@
 
                 <div class="flex-1 h-px bg-gray-300"></div>
 
-            </div>
+            </div> -->
 
             <!-- Google -->
-            <button
+            <!-- <button
                 class="w-full border rounded-lg py-3 font-medium hover:bg-gray-50 text-sm sm:text-base">
 
                 Masuk dengan Google
 
-            </button>
+            </button> -->
 
             <!-- Register -->
             <p class="text-center mt-8 text-gray-600">

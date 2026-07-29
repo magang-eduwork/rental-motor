@@ -31,7 +31,7 @@ class KendaraanController extends Controller
             });
         }
 
-        $products = $query->latest()->paginate(10)->withQueryString();
+        $products = $query->latest()->paginate(12)->withQueryString();
         $tipes = Product::select('tipe')->distinct()->pluck('tipe');
 
         return view('admin.kendaraan.index', compact('products', 'tipes'));

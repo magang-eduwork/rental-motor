@@ -61,10 +61,16 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-sm font-medium text-gray-700">Durasi sewa : {{ request('durasi', 1) }} hari</span>
-                        <a href="{{ url()->previous() }}" class="text-blue-600 text-sm hover:underline flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-2.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <button
+                            type="button"
+                            onclick="openEditModal()"
+                            class="text-blue-600 text-sm hover:underline flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.232 5.232l3.536 3.536m-2.036-2.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
                             Edit
-                        </a>
+                        </button>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 text-sm mb-6 border-b border-gray-100 pb-4">
@@ -83,10 +89,7 @@
                     </div>
 
                     <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
-                        <img src="{{ asset($product->image_url) }}" 
-                             alt="{{ $product->nama_motor }}" 
-                             class="w-16 h-16 object-cover rounded-lg bg-white border border-gray-100">
-                        
+                       <img src="{{ $product->image_url }}" alt="{{ $product->nama_motor }}" class="w-16 h-16 object-contain rounded-lg bg-white border border-gray-100">
                         <div>
                             <p class="font-bold text-gray-800">{{ $product->nama_motor }}</p>
                             <p class="text-xs text-gray-400 font-medium">{{ $product->tipe }}</p>
@@ -122,7 +125,170 @@
                     </form>
                 </div>
             </div>
-
+            </div>
         </div>
+
+    {{-- Modal Edit Jadwal --}}
+    <div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 transition-opacity duration-200">
+    <div id="modalCard" class="bg-white rounded-2xl p-8 w-full max-w-md scale-95 opacity-0 transition-all duration-200">
+
+        <h2 class="text-xl font-bold mb-6">
+            Edit Jadwal Sewa
+        </h2>
+
+        <form id="editForm">
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">
+                    Tanggal Sewa
+                </label>
+
+                <input
+                    type="date"
+                    name="tanggal_sewa"
+                    value="{{ request('tanggal_sewa') }}"
+                    class="w-full border rounded-lg p-3">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">
+                    Jam Sewa
+                </label>
+
+                <input
+                    type="time"
+                    name="jam_sewa"
+                    value="{{ request('jam_sewa') }}"
+                    class="w-full border rounded-lg p-3">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">
+                    Durasi
+                </label>
+
+                <<select id="durasi" name="durasi" class="w-full border rounded-lg p-3">
+                    @for($i=1;$i<=14;$i++)
+                        <option
+                            value="{{ $i }}"
+                            {{ request('durasi',1)==$i ? 'selected' : '' }}>
+                            {{ $i }} Hari
+                        </option>
+                    @endfor
+
+                </select>
+                <div class="bg-gray-50 rounded-xl p-4 mt-5">
+
+                <div class="flex justify-between items-center">
+
+                    <span class="text-gray-600">
+                        Estimasi Total
+                    </span>
+
+                    <span
+                        id="previewTotal"
+                        class="text-xl font-bold text-blue-600">
+
+                        Rp{{ number_format($product->harga_per_hari * (int) request('durasi',1),0,',','.') }}
+
+                    </span>
+
+                </div>
+
+            </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+
+                <button
+                    type="button"
+                    onclick="closeEditModal()"
+                    class="px-5 py-2 rounded-lg border">
+
+                    Batal
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="px-5 py-2 rounded-lg bg-blue-600 text-white">
+
+                    Simpan
+
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
+
+</div>
+
+
+<script>
+
+    function openEditModal(){
+
+        const modal = document.getElementById('editModal');
+        const card = document.getElementById('modalCard');
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        setTimeout(() => {
+            card.classList.remove('scale-95','opacity-0');
+            card.classList.add('scale-100','opacity-100');
+        },10);
+
+    }
+
+    function closeEditModal(){
+
+        const modal = document.getElementById('editModal');
+        const card = document.getElementById('modalCard');
+
+        card.classList.remove('scale-100','opacity-100');
+        card.classList.add('scale-95','opacity-0');
+
+        setTimeout(() => {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        },200);
+
+    }
+    document
+    .getElementById('editForm')
+    .addEventListener('submit', function(e){
+
+        e.preventDefault();
+
+        let data = new FormData(this);
+
+        let url =
+            "{{ route('booking.checkout',$product) }}"
+            + "?tanggal_sewa=" + data.get('tanggal_sewa')
+            + "&jam_sewa=" + data.get('jam_sewa')
+            + "&durasi=" + data.get('durasi');
+
+        window.location.href = url;
+
+    });
+
+    const hargaPerHari = {{ $product->harga_per_hari }};
+
+    const durasi = document.getElementById('durasi');
+
+    const preview = document.getElementById('previewTotal');
+
+    durasi.addEventListener('change', function(){
+
+        let total = hargaPerHari * parseInt(this.value);
+
+        preview.innerHTML =
+            "Rp" + total.toLocaleString('id-ID');
+
+    });
+</script>
+
 </x-app-layout>
