@@ -25,7 +25,7 @@ class OrderController extends Controller
         $orders = Order::with(['product', 'payment'])
             ->where('user_id', Auth::id())
             ->latest()
-            ->paginate(10);
+            ->paginate(5);
         
         // Tetap melimit 4 produk opsional untuk kebutuhan section rekomendasi di view jika diperlukan
         $products = Product::limit(4)->get(); 
