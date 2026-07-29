@@ -149,7 +149,16 @@
                 </div>
                 <div class="motor-info">
                     <span>{{ $product->plat_nomor }}</span>
-                    <span class="motor-available">{{ ucfirst($product->status) }}</span>
+
+                    @if($product->status === 'tersedia')
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-600">
+                            ● Tersedia
+                        </span>
+                    @else
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-600">
+                            Tidak Tersedia
+                        </span>
+                    @endif
                 </div>
                 <div class="motor-price">
                     <div>
