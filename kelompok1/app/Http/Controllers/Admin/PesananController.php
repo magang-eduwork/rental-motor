@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Product; // Pastikan Model Product di-import
 use Illuminate\Http\Request;
 
 class PesananController extends Controller
@@ -20,9 +21,12 @@ class PesananController extends Controller
             $query->where('status', $request->status);
         }
 
-        // 2. Filter berdasarkan Tipe Kendaraan / Nama Motor
+        // 2. Filter berdasarkan Tipe Kendaraan / Nama Motor (Disesuaikan dengan relasi product)
         if ($request->filled('tipe_kendaraan') && $request->tipe_kendaraan !== 'Semua') {
-            $query->where('nama_motor', 'like', '%' . $request->tipe_kendaraan . '%');
+            $query->whereHas('product', function($q) use ($request) {
+                $q->where('tipe', $request->tipe_kendaraan)
+                  ->orWhere('nama_motor', 'like', '%' . $request->tipe_kendaraan . '%');
+            });
         }
 
         // 3. Filter berdasarkan Tanggal Booking
@@ -41,10 +45,13 @@ class PesananController extends Controller
         }
 
         // Ambil data dengan pagination (10 data per halaman) diurutkan dari terbaru
-        $orders = $query->latest()->paginate(10)->withQueryString();
+        $orders = $query->latest()->paginate(5)->withQueryString();
 
-        // Ambil daftar unik nama motor untuk pilihan dropdown filter
-        $motorOptions = Order::select('nama_motor')->distinct()->pluck('nama_motor');
+        // Ambil daftar unik tipe/nama motor dari tabel Product agar sinkron dengan dropdown view
+        $motorOptions = Product::pluck('tipe')->unique()->filter();
+        if ($motorOptions->isEmpty()) {
+            $motorOptions = Order::select('nama_motor')->distinct()->pluck('nama_motor');
+        }
 
         return view('admin.pesanan.index', compact('orders', 'motorOptions'));
     }
@@ -69,15 +76,19 @@ class PesananController extends Controller
         $order->save();
 
         if ($request->status === 'Sedang dibawa') {
-            $order->product->update([
-                'status' => 'tidak_tersedia'
-            ]);
+            if ($order->product) {
+                $order->product->update([
+                    'status' => 'tidak_tersedia'
+                ]);
+            }
         }
 
         if ($request->status === 'Sudah kembali' || $request->status === 'Batal') {
-            $order->product->update([
-                'status' => 'tersedia'
-            ]);
+            if ($order->product) {
+                $order->product->update([
+                    'status' => 'tersedia'
+                ]);
+            }
         }
 
         return response()->json([

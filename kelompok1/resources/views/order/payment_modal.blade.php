@@ -45,11 +45,11 @@
                         class="flex items-center justify-between p-4 rounded-2xl border-2 transition text-left focus:outline-none cursor-pointer w-full">
                     <div class="flex items-center gap-3">
                         <span class="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </span>
                         <div>
-                            <p class="font-bold text-sm">Transfer Bank</p>
-                            <p class="text-xs text-gray-400">Virtual Account (BCA, Mandiri, BNI, BRI, dll)</p>
+                            <p class="font-bold text-sm">Instan & Otomatis (Midtrans)</p>
+                            <p class="text-xs text-gray-400">QRIS, GoPay, ShopeePay, Virtual Account</p>
                         </div>
                     </div>
                     <div class="w-5 h-5 rounded-full border flex items-center justify-center" 
@@ -59,7 +59,7 @@
                 </button>
 
                 <!-- QRIS -->
-                <button type="button" 
+                {{-- <button type="button" 
                         @click="selectedPaymentMethod = 'QRIS'"
                         :class="selectedPaymentMethod === 'QRIS' ? 'border-indigo-600 bg-indigo-50/40 text-indigo-900 shadow-sm' : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'"
                         class="flex items-center justify-between p-4 rounded-2xl border-2 transition text-left focus:outline-none cursor-pointer w-full">
@@ -76,7 +76,7 @@
                          :class="selectedPaymentMethod === 'QRIS' ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300'">
                         <div class="w-2 h-2 rounded-full bg-white" x-show="selectedPaymentMethod === 'QRIS'"></div>
                     </div>
-                </button>
+                </button> --}}
 
                 <!-- Bayar Tunai (COD) -->
                 <button type="button" 
