@@ -45,7 +45,7 @@ class PesananController extends Controller
         }
 
         // Ambil data dengan pagination (10 data per halaman) diurutkan dari terbaru
-        $orders = $query->latest()->paginate(5)->withQueryString();
+        $orders = $query->latest()->paginate(7)->withQueryString();
 
         // Ambil daftar unik tipe/nama motor dari tabel Product agar sinkron dengan dropdown view
         $motorOptions = Product::pluck('tipe')->unique()->filter();
@@ -74,6 +74,22 @@ class PesananController extends Controller
         $order->tanggal_sewa = $request->tanggal_sewa;
         $order->tanggal_selesai = $request->tanggal_selesai;
         $order->save();
+
+        // Sinkronkan status pembayaran untuk metode Tunai
+        if ($order->payment && $order->payment->metode_pembayaran === 'Tunai') {
+
+            if ($request->status === 'Pending') {
+                $order->payment->update([
+                    'status_pembayaran' => 'pending'
+                ]);
+            }
+
+            if ($request->status === 'Lunas') {
+                $order->payment->update([
+                    'status_pembayaran' => 'success'
+                ]);
+            }
+        }
 
         if ($request->status === 'Sedang dibawa') {
             if ($order->product) {

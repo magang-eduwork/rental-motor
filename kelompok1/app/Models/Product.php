@@ -13,5 +13,6 @@ class Product extends Model
         'status',
         'image_url',
         'plat_nomor',
+        'fl_aktif',
     ];
 }

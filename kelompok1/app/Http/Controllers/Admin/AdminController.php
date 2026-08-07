@@ -19,8 +19,14 @@ class AdminController extends Controller
         // 1. Jumlah Kendaraan (Menyesuaikan status dari migration products)
         $totalKendaraan = Product::count();
         $kendaraanTersedia = Product::where('status', 'tersedia')->count();
-        $kendaraanDisewa = Product::where('status', 'disewa')->count();
-        $jumlahBookingan = Order::whereIn('status', ['Pending', 'Lunas', 'Sedang dibawa', 'pending'])->count();
+        $kendaraanDisewa = Product::where('status', 'tidak_tersedia')->count();
+        $jumlahBookingan = Payment::whereIn('status_pembayaran', ['success'])->count();
+
+        // Jumlah kendaraan per tipe untuk diagram
+        $kendaraanPerTipe = Product::select('tipe', DB::raw('count(*) as total'))
+                            ->groupBy('tipe')
+                            ->orderByDesc('total')
+                            ->get();
 
         // 2. Pendapatan (Berdasarkan filter Tipe Kendaraan & Rentang Tanggal)
         $queryPendapatan = Payment::where('status_pembayaran', 'success');
@@ -42,7 +48,7 @@ class AdminController extends Controller
         // 3. Pesanan Terakhir
         $pesananTerakhir = Order::with(['product', 'payment'])
                             ->latest()
-                            ->take(6)
+                            ->take(9)
                             ->get();
 
         // 4. 5 Top Orderan Rental (Menggunakan relasi product agar akurat berdasarkan nama motor)
@@ -69,6 +75,7 @@ class AdminController extends Controller
             'totalKendaraan',
             'kendaraanTersedia',
             'kendaraanDisewa',
+            'kendaraanPerTipe',
             'jumlahBookingan',
             'totalPendapatan',
             'pesananTerakhir',

@@ -10,11 +10,11 @@
     <form action="{{ route('admin.pesanan.index') }}" method="GET" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-end mb-6">
         <!-- Filter Status -->
         <div class="flex-1 min-w-[180px]">
-            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Status</label>
+            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Status Kendaraan</label>
             <select name="status" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500">
                 <option value="Semua" {{ request('status') == 'Semua' ? 'selected' : '' }}>Semua</option>
                 <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
-                <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
+                <!-- <option value="Lunas" {{ request('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option> -->
                 <option value="Batal" {{ request('status') == 'Batal' ? 'selected' : '' }}>Batal</option>
                 <option value="Sedang dibawa" {{ request('status') == 'Sedang dibawa' ? 'selected' : '' }}>Sedang dibawa</option>
                 <option value="Sudah kembali" {{ request('status') == 'Sudah kembali' ? 'selected' : '' }}>Sudah kembali</option>
@@ -87,6 +87,12 @@
                     </span>
                 </div>
 
+                 <!-- Metode Pembayaran -->
+                <div>
+                    <span class="text-xs text-gray-400 font-medium block mb-1">Metode Pembayaran</span>
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">{{ $order->payment?->metode_pembayaran ?? '-'  }}</span>
+                </div>
+
                 <!-- Status Pembayaran & Kendaraan -->
                 <div class="flex items-center gap-4">
                     <!-- Pembayaran -->
@@ -105,8 +111,8 @@
 
                     <!-- Kendaraan -->
                     <div>
-                        <span class="text-xs text-gray-400 font-medium block mb-1">Status Kendaraan</span>
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                        <span class="text-xs text-gray-400 font-medium block mb-1" style="padding-left: 15px;">Status Kendaraan</span>
+                        <span style="margin-left: 20px;" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700" >
                             {{ $order->status }}
                         </span>
                     </div>
@@ -253,7 +259,32 @@
         document.getElementById('modalTanggalSewa').value = formatDateTimeLocal(order.tanggal_sewa);
         document.getElementById('modalTanggalSelesai').value = formatDateTimeLocal(order.tanggal_selesai);
         
-        document.getElementById('modalStatusSelect').value = order.status;
+        const statusSelect = document.getElementById('modalStatusSelect');
+
+        // tampilkan semua option terlebih dahulu
+        Array.from(statusSelect.options).forEach(option => {
+            option.hidden = false;
+        });
+
+        const metodePembayaran = order.payment?.metode_pembayaran;
+
+        // Jika pembayaran Transfer (Midtrans)
+        if (metodePembayaran === 'Transfer') {
+
+            statusSelect.querySelector('option[value="Pending"]').hidden = true;
+            statusSelect.querySelector('option[value="Lunas"]').hidden = true;
+
+            // Jika status saat ini Pending/Lunas, pilih status berikutnya
+            if (order.status === 'Pending' || order.status === 'Lunas') {
+                statusSelect.value = 'Sedang dibawa';
+            } else {
+                statusSelect.value = order.status;
+            }
+
+        } else {
+            // Tunai
+            statusSelect.value = order.status;
+        }
         
         modal.classList.remove('hidden');
         setTimeout(() => {

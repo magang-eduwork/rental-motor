@@ -12,16 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->char('fl_aktif', 1)
-                  ->default('Y')
-                  ->after('status');
+            //
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('fl_aktif');
+            //
         });
     }
 };

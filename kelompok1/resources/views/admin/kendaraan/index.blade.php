@@ -54,12 +54,36 @@
                     <!-- Header Kartu -->
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <h3 class="font-bold text-gray-900 text-base leading-tight">{{ $product->nama_motor }}</h3>
-                            <span class="text-xs text-gray-400 font-medium">{{ $product->tipe }}</span>
+                            <h3 class="font-bold text-gray-900 text-base leading-tight">
+                                {{ $product->nama_motor }}
+                            </h3>
+
+                            <span class="text-xs text-gray-400 font-medium">
+                                {{ $product->tipe }}
+                            </span>
                         </div>
-                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ strtolower($product->status) == 'tersedia' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600' }}">
-                            {{ strtolower($product->status) == 'tersedia' ? '● Tersedia' : '● Tidak Tersedia' }}
-                        </span>
+
+                        <div class="flex flex-col gap-2 items-end">
+
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                {{ strtolower($product->status) == 'tersedia'
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'bg-red-50 text-red-600' }}">
+                                {{ strtolower($product->status) == 'tersedia'
+                                    ? '● Tersedia'
+                                    : '● Tidak Tersedia' }}
+                            </span>
+
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                                {{ $product->fl_aktif == 'Y'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'bg-gray-100 text-gray-500' }}">
+                                {{ $product->fl_aktif == 'Y'
+                                    ? '● Aktif'
+                                    : '● Tidak Aktif' }}
+                            </span>
+
+                        </div>
                     </div>
 
                     <!-- Gambar Motor (Proporsional & Rapi) -->
@@ -123,8 +147,25 @@
                     <input type="text" name="nama_motor" id="modalNama" required class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Tipe</label>
-                    <input type="text" name="tipe" id="modalTipe" required class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none" placeholder="Matic / Motor Bebek / Sport">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                        Tipe Kendaraan
+                    </label>
+
+                    <select
+                        name="tipe"
+                        id="modalTipe"
+                        required
+                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                        <option value="" selected disabled>Pilih Tipe Kendaraan</option>
+                        <option value="Matic">Matic</option>
+                        <option value="Motor Bebek">Motor Bebek</option>
+                        <option value="Sport">Sport</option>
+                        <option value="Trail">Trail</option>
+                        <option value="Listrik">Listrik</option>
+                        
+
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">No. Plat</label>
@@ -133,6 +174,21 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Harga Per Hari (Rp)</label>
                     <input type="number" name="harga_per_hari" id="modalHarga" required class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                        Status Kendaraan
+                    </label>
+
+                    <select
+                        name="fl_aktif"
+                        id="modalAktif"
+                        class="w-full bg-gray-50 border border-gray-200 text-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none">
+
+                        <option value="Y">Aktif</option>
+                        <option value="N">Tidak Aktif</option>
+
+                    </select>
                 </div>
             </div>
 
@@ -168,6 +224,7 @@
         document.getElementById('modalPlat').value = product.plat_nomor;
         document.getElementById('modalHarga').value = product.harga_per_hari;
         document.getElementById('deleteBtn').classList.remove('hidden');
+        document.getElementById('modalAktif').value = product.fl_aktif;
         modal.classList.remove('hidden');
         setTimeout(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); modalContent.classList.add('scale-100'); }, 20);
     }
