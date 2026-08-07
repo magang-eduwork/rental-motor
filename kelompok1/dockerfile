@@ -1,3 +1,4 @@
+ls
 FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
@@ -23,10 +24,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN npm install
 RUN npm run build
-
-RUN cp .env.example .env || true
-
-RUN php artisan key:generate --force || true
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
