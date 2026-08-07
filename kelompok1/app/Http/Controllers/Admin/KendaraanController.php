@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Cloudinary\Cloudinary;
 
 class KendaraanController extends Controller
 {
@@ -41,7 +42,7 @@ class KendaraanController extends Controller
     {
         $request->validate([
             'nama_motor'     => 'required|string|max:255',
-            'tipe'           => 'required|string',
+            'tipe'           => 'required|in:Matic,Motor Bebek,Sport,Listrik',
             'harga_per_hari' => 'required|numeric',
             'plat_nomor'     => 'required|string|unique:products,plat_nomor',
             'image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -49,14 +50,32 @@ class KendaraanController extends Controller
 
         $data = $request->only(['nama_motor', 'tipe', 'harga_per_hari', 'plat_nomor']);
         $data['status'] = 'tersedia';
+        $data['fl_aktif'] = 'Y';
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image_url'] = 'storage/' . $imagePath;
-        } else {
-            $data['image_url'] = 'https://i.ibb.co.com/VYfhgqm4/image-44.png';
-        }
 
+            $cloudinary = new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key' => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+            ]);
+
+            $upload = $cloudinary->uploadApi()->upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'products'
+                ]
+            );
+
+            $data['image_url'] = $upload['secure_url'];
+
+        } else {
+
+            $data['image_url'] = 'https://i.ibb.co.com/VYfhgqm4/image-44.png';
+
+        }
         Product::create($data);
 
         return response()->json(['success' => true, 'message' => 'Kendaraan berhasil ditambahkan.']);
@@ -68,17 +87,32 @@ class KendaraanController extends Controller
 
         $request->validate([
             'nama_motor'     => 'required|string|max:255',
-            'tipe'           => 'required|string',
+            'tipe' => 'required|in:Matic,Motor Bebek,Sport,Listrik',
             'harga_per_hari' => 'required|numeric',
             'plat_nomor'     => 'required|string|unique:products,plat_nomor,' . $id,
             'image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $data = $request->only(['nama_motor', 'tipe', 'harga_per_hari', 'plat_nomor']);
+        $data = $request->only(['nama_motor', 'tipe', 'harga_per_hari', 'plat_nomor', 'fl_aktif']);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image_url'] = 'storage/' . $imagePath;
+            $cloudinary = new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key' => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+            ]);
+
+            $upload = $cloudinary->uploadApi()->upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'products'
+                ]
+            );
+
+            $data['image_url'] = $upload['secure_url'];
+
         }
 
         $product->update($data);

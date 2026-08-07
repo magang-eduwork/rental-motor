@@ -14,11 +14,17 @@ class BookingController extends Controller
 {
     public function create(Product $product)
     {
+        if ($product->fl_aktif !== 'Y') {
+            abort(404);
+        }
         return view('booking.checkout', compact('product'));
     }
 
     public function showVehicle(Product $product)
     {
+        if ($product->fl_aktif !== 'Y') {
+            abort(404);
+        }
         return view('order.vehicle-display', compact('product'));
     }
 
@@ -35,6 +41,11 @@ class BookingController extends Controller
         ]);
 
         $product = Product::findOrFail($validated['product_id']);
+        if ($product->fl_aktif !== 'Y') {
+            return back()
+                ->withInput()
+                ->with('error', 'Kendaraan sudah tidak tersedia untuk disewa.');
+        }
         if ($product->status !== 'tersedia') {
             return back()
                 ->withInput()

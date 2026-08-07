@@ -19,22 +19,31 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', fn() => view('welcome'));
 
 Route::get('/home', function () {
-    $products = Product::take(4)->get();
+    $products = Product::where('fl_aktif', 'Y')
+        ->latest()
+        ->take(4)
+        ->get();
     return view('home', compact('products'));
 })->name('home');
 
 Route::get('/kendaraan', function () {
-    $query = Product::query();
+
+    $query = Product::where('fl_aktif', 'Y');
 
     if (request('tipe') && request('tipe') !== 'Semua') {
         $query->where('tipe', request('tipe'));
     }
+
     if (request('cari')) {
         $query->where('nama_motor', 'like', '%' . request('cari') . '%');
     }
 
     $products = $query->paginate(12)->withQueryString();
-    $tipes = Product::select('tipe')->distinct()->pluck('tipe');
+
+    $tipes = Product::where('fl_aktif', 'Y')
+        ->select('tipe')
+        ->distinct()
+        ->pluck('tipe');
 
     $tanggalSewa = request('tanggal_sewa', date('Y-m-d', strtotime('+1 day')));
     $jamSewa = request('jam_sewa', '08:00');
@@ -48,7 +57,11 @@ Route::get('/kendaraan', function () {
         $reqEnd = $reqStart->copy()->addDays(1);
     }
 
-    return view('kendaraan', compact('products', 'tipes'));
+    return view('kendaraan', compact(
+        'products',
+        'tipes'
+    ));
+
 })->name('kendaraan');
 
 Route::get('/kendaraan/{product}/detail', [BookingController::class, 'showVehicle'])->name('vehicle.display');

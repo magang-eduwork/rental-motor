@@ -19,9 +19,13 @@ class MidtransWebhookController extends Controller
         $payment = Payment::where('midtrans_order_id', $orderId)->first();
 
         if (!$payment) {
+            Log::warning('Payment tidak ditemukan', [
+                'order_id' => $orderId,
+            ]);
+
             return response()->json([
-                'message' => 'Payment tidak ditemukan'
-            ], 404);
+                'message' => 'OK'
+            ], 200);
         }
 
         switch ($status) {
