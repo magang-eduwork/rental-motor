@@ -15,6 +15,7 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         $motors = [
+<<<<<<< Updated upstream
             ['nama_motor' => 'Honda Beat', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1010 BT', 'image_url' => 'https://i.ibb.co.com/rRbwxgSx/New-Honda-Beat.webp'],
             ['nama_motor' => 'Honda Beat Street', 'tipe' => 'Matic', 'harga_per_hari' => 80000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1011 BS', 'image_url' => 'https://i.ibb.co.com/qLXgxVzL/Honda-Beat-Street.webp'],
             ['nama_motor' => 'Honda Vario 125', 'tipe' => 'Matic', 'harga_per_hari' => 85000, 'status' => 'tersedia', 'plat_nomor' => 'AB 1012 VR', 'image_url' => 'https://i.ibb.co.com/P3W4PPs/Honda-Vario-125.webp'],
@@ -65,6 +66,20 @@ class ProductSeeder extends Seeder
             ['nama_motor' => 'Kawasaki KLX 230', 'tipe' => 'Trail', 'harga_per_hari' => 200000, 'status' => 'tersedia', 'plat_nomor' => 'AB 4013 KL', 'image_url' => 'https://i.ibb.co.com/svK1ZrQL/Kawasaki-KLX-230.jpg'],
             ['nama_motor' => 'Kawasaki D-Tracker 150', 'tipe' => 'Trail', 'harga_per_hari' => 145000, 'status' => 'tersedia', 'plat_nomor' => 'AB 4014 DT', 'image_url' => 'https://i.ibb.co.com/rgs9zgX/Kawasaki-D-Tracker-150.jpg'],
             ['nama_motor' => 'Honda CRF250 Rally', 'tipe' => 'Trail', 'harga_per_hari' => 250000, 'status' => 'tersedia', 'plat_nomor' => 'AB 4015 RY', 'image_url' => 'https://i.ibb.co.com/Txrb8Cfz/Honda-CRF250-Rally.webp'],
+=======
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9001 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9002 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9003 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9004 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9005 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Vega Force', 'tipe' => 'Motor Bebek', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9006 DE', 'image_url' => 'https://i.ibb.co.com/VYfhgqm4/image-44.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9007 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9008 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9009 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9010 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9011 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+            ['nama_motor' => 'Scoopy', 'tipe' => 'Matic', 'harga_per_hari' => 75000, 'status' => 'tersedia', 'plat_nomor' => 'AB 9012 DE', 'image_url' => 'https://i.ibb.co.com/FqjrV4TJ/image-15.png'],
+>>>>>>> Stashed changes
         ];
         foreach ($motors as $motor) {
             \App\Models\Product::updateOrCreate(
