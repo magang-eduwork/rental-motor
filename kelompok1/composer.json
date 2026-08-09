@@ -65,7 +65,7 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php artisan file_exists('database/database.sqlite') || touch('database/database.sqlite');",
             "@php artisan migrate --graceful --ansi"
         ],
         "pre-package-uninstall": [
@@ -84,13 +84,11 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
-    "config-options": {
+        },
         "audit": {
             "block": false
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
