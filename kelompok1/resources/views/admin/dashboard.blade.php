@@ -7,11 +7,11 @@
     <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
 </div>
 
-{{-- Wrapper: 2 section berdampingan pakai flexbox --}}
-<div style="display: flex; gap: 1.5rem; align-items: stretch; min-height: 0;">
+{{-- Wrapper: 2 section berdampingan pakai flexbox (responsif) --}}
+<div class="flex flex-col xl:flex-row gap-6 items-stretch min-h-0">
 
     {{-- ===== SECTION KIRI: Top Orderan + Jumlah Kendaraan + Pendapatan ===== --}}
-    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1.5rem;">
+    <div class="flex-1 min-w-0 flex flex-col gap-6">
 
         {{-- Card: 5 Top Orderan Rental --}}
         <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -44,11 +44,11 @@
             </div>
         </div>
 
-        {{-- Row: Jumlah Kendaraan & Pendapatan berdampingan --}}
-        <div style="display: flex; gap: 1.5rem;">
+        {{-- Row: Jumlah Kendaraan & Pendapatan berdampingan (responsif) --}}
+        <div class="flex flex-col md:flex-row gap-6">
 
             {{-- Card: Jumlah Kendaraan --}}
-            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm" style="flex: 1; min-width: 0;">
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex-1 min-w-0">
                 <div class="flex justify-between items-start mb-4">
                     <h3 class="text-base font-bold text-gray-800 flex items-center">
                         <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>
@@ -85,12 +85,12 @@
             @endphp
 
             {{-- Card: Pendapatan --}}
-            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm" style="flex: 1; min-width: 0;">
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex-1 min-w-0">
                 <form action="" method="GET" id="income-filter-form">
                     <h3 class="text-xl font-bold text-gray-900 flex items-center mb-6">
                         <span class="w-3 h-3 rounded-full bg-blue-400 mr-2"></span> Pendapatan
                     </h3>
-                    <div class="grid grid-cols-3 gap-3 items-start pb-6 mb-4 border-b border-gray-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start pb-6 mb-4 border-b border-gray-100">
                         {{-- Tipe Kendaraan --}}
                         <div class="relative">
                             <label class="block text-sm font-bold text-gray-900 mb-1">Tipe Kendaraan</label>
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                         {{-- Awal --}}
-                        <div class="relative border-l border-gray-200 pl-3">
+                        <div class="relative sm:border-l border-gray-200 sm:pl-3">
                             <label class="block text-sm font-bold text-gray-900 mb-1">Awal</label>
                             <input type="date" name="tanggal_awal"
                                    value="{{ request('tanggal_awal') }}"
@@ -118,7 +118,7 @@
                             </div>
                         </div>
                         {{-- Akhir --}}
-                        <div class="relative border-l border-gray-200 pl-3">
+                        <div class="relative sm:border-l border-gray-200 sm:pl-3">
                             <label class="block text-sm font-bold text-gray-900 mb-1">Akhir</label>
                             <input type="date" name="tanggal_akhir"
                                    value="{{ request('tanggal_akhir') }}"
@@ -155,9 +155,9 @@
     </div>{{-- end section kiri --}}
 
     {{-- ===== SECTION KANAN: Pesanan Terakhir ===== --}}
-    <div style="width: 700px; flex-shrink: 0; display: flex; flex-direction: column;">
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col" style="flex: 1; overflow: hidden;">
-            <div class="flex justify-between items-center mb-4" style="flex-shrink: 0;">
+    <div class="w-full xl:w-[380px] 2xl:w-[480px] flex-shrink-0 flex flex-col">
+        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col flex-1 overflow-hidden">
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
                 <h1 class="text-3xl font-bold text-gray-800">Pesanan Terakhir</h1>
                 <a href="{{ route('admin.pesanan.index') }}" class="text-l text-blue-600 font-semibold hover:underline">Lihat semua</a>
             </div>
