@@ -4,19 +4,19 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
-    <div class="flex justify-between items-center mb-2">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Kelola Kendaraan</h1>
             <p class="text-sm text-gray-500 mt-1">Pilih kendaraan yang paling sesuai dengan gaya perjalanan dan budget Anda. Semua motor terawat, siap jalan!</p>
         </div>
-        <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 cursor-pointer">
+        <button onclick="openAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer flex-shrink-0">
             <i class="fa-solid fa-plus"></i> <span>Tambah Kendaraan</span>
         </button>
     </div>
 
     <!-- Filter Bar -->
-    <form action="{{ route('admin.kendaraan.index') }}" method="GET" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-wrap gap-4 items-end mb-6">
-        <div class="flex-1 min-w-[180px]">
+    <form action="{{ route('admin.kendaraan.index') }}" method="GET" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end mb-6">
+        <div>
             <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">TIPE KENDARAAN</label>
             <select name="tipe" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none">
                 <option value="Semua">Semua</option>
@@ -26,7 +26,7 @@
             </select>
         </div>
 
-        <div class="flex-1 min-w-[180px]">
+        <div>
             <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">STATUS</label>
             <select name="status" onchange="this.form.submit()" class="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none">
                 <option value="Semua" {{ request('status') == 'Semua' ? 'selected' : '' }}>Semua</option>
@@ -35,7 +35,7 @@
             </select>
         </div>
 
-        <div class="flex-1 min-w-[220px]">
+        <div class="sm:col-span-2 lg:col-span-1">
             <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">CARI KENDARAAN</label>
             <div class="relative flex items-center">
                 <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Nama motor atau plat..." class="w-full bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none pr-10">
@@ -47,7 +47,7 @@
     </form>
 
     <!-- Grid Kartu Kendaraan -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($products as $product)
             <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
                 <div>

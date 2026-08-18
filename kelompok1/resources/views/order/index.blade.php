@@ -14,12 +14,12 @@
     {{-- Daftar Pesanan --}}
     <div class="grid gap-6 mb-16">
         @forelse($orders as $order)
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6">
-            <div class="w-full md:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row items-center gap-6">
+            <div class="w-full lg:w-48 h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center">
                 <img src="{{ $order->product->image_url }}" alt="{{ $order->nama_motor }}" class="w-full h-full object-cover">
             </div>
 
-            <div class="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
+            <div class="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-4 w-full">
                 <div>
                     <p class="text-xs text-gray-500 uppercase">Motor</p>
                     <p class="font-bold text-gray-900">{{ $order->nama_motor }}</p>
@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
+            <div class="w-full lg:w-auto flex flex-col sm:flex-row gap-2">
                 <button 
                     type="button"
                     @click="
@@ -160,7 +160,8 @@
 </div>
 
 {{-- SCRIPT INTEGRASI MIDTRANS SNAP DENGAN CALLBACK INTERNAL --}}
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+{{-- URL diambil dari config/midtrans.php — Sandbox selama MIDTRANS_IS_PRODUCTION=false --}}
+<script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 
 function orderPage() {
@@ -195,13 +196,10 @@ function orderPage() {
 
         window.snap.pay(snapToken, {
             onSuccess: function(result) {
-                // Tembak perubahan status lokal secara instan tanpa perlu menunggu webhook
-                // updateOrderStatusLocal(orderId);
-                window.location.reload();
+                updateOrderStatusLocal(orderId, result);
             },
             onPending: function(result) {
-                alert("Menunggu penyelesaian pembayaran Anda.");
-                window.location.reload();
+                updateOrderStatusLocal(orderId, result);
             },
             onError: function(result) {
                 alert("Pembayaran gagal, silakan coba lagi.");
@@ -214,21 +212,25 @@ function orderPage() {
     }
 
     // Fungsi pembantu AJAX ke backend
-    function updateOrderStatusLocal(orderId) {
+    function updateOrderStatusLocal(orderId, result) {
         if (!orderId) return;
         
-        fetch('/daftar-pesanan/' + orderId + '/update-status-lokal', {
+        fetch('/daftar-pesanan/' + orderId + '/finish', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({
+                transaction_id: result?.transaction_id || null,
+                payment_type: result?.payment_type || null,
+                transaction_status: result?.transaction_status || 'settlement'
+            })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Pembayaran sukses diterima!');
+                alert(data.message || 'Pembayaran berhasil!');
             }
             window.location.reload();
         })

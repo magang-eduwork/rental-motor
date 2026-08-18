@@ -16,15 +16,23 @@ use Illuminate\Support\Facades\Auth;
 // ===================================================================
 // --- 1. RUTE PUBLIK (Bisa Diakses Semua Tanpa Login)              ---
 // ===================================================================
-Route::get('/', fn() => view('welcome'));
 
-Route::get('/home', function () {
+// Route::get('/', function () {
+//     return 'Laravel berhasil jalan!';
+// })->name('home');
+
+Route::get('/', function () {
     $products = Product::where('fl_aktif', 'Y')
         ->latest()
         ->take(4)
         ->get();
+
     return view('home', compact('products'));
 })->name('home');
+
+Route::get('/home', function () {
+    return redirect('/');
+});
 
 Route::get('/kendaraan', function () {
 
@@ -93,9 +101,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('order.index');
         Route::get('/{id}', [OrderController::class, 'show'])->name('order.show');
         Route::post('/{id}/pay', [OrderController::class, 'pay'])->name('order.pay');
-        
-        // Fitur Pembaruan Status Lokal Khusus Sisi User
-        Route::post('/{id}/update-status-lokal', [OrderController::class, 'updateStatusLokal'])->name('order.update-status-lokal');
+        Route::post('/{id}/finish', [OrderController::class, 'finishPayment'])->name('order.finish');
     });
 });
 

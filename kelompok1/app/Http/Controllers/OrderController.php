@@ -97,69 +97,71 @@ class OrderController extends Controller
                 ]);
             }
 
-            // --- STRATEGI 2: JIKA METODE DIGITAL (TRANSFER BANK / QRIS VIA MIDTRANS) ---
-            Config::$serverKey = config('midtrans.server_key');
-            Config::$isProduction = config('midtrans.is_production');
-            Config::$isSanitized = config('midtrans.is_sanitized');
-            Config::$is3ds = config('midtrans.is_3ds');
-
-            // PERBAIKAN SOLUSI SSL: Kosongkan curlOptions bawaan SDK untuk menghindari error 'Undefined array key 10023'
-            Config::$curlOptions = [];
-
-            // Mematikan verifikasi SSL menggunakan Stream Context global PHP khusus di lingkungan local/development
-            if (config('app.env') === 'local' || env('APP_ENV') === 'local') {
-                stream_context_set_default([
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                    ],
-                ]);
+            // Cek jika pesanan sudah lunas
+            if ($order->payment && $order->payment->status_pembayaran === 'success') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pesanan ini sudah lunas.',
+                ], 400);
             }
 
+            // --- STRATEGI 2: JIKA METODE DIGITAL (TRANSFER BANK / QRIS VIA MIDTRANS SANDBOX) ---
+            Config::$serverKey    = config('midtrans.server_key');
+            Config::$isProduction = config('midtrans.is_production'); // false = Sandbox
+            Config::$isSanitized  = config('midtrans.is_sanitized');
+            Config::$is3ds        = config('midtrans.is_3ds');
+
+            // SSL verification handled by server configuration.
+            // Tidak ada override khusus pada SDK Midtrans di lingkungan production cPanel.
+            Config::$curlOptions = [];
+
+            // Gunakan order_id unik per percobaan pembayaran agar Midtrans tidak menolak percobaan bayar ulang (Retry/Pay Later)
             $midtransOrderId = $order->kode_booking . '-' . time();
             $params = [
                 'transaction_details' => [
-                'order_id' => $midtransOrderId,
-                'gross_amount' => (int) $order->harga,
-             ],
+                    'order_id'     => $midtransOrderId,
+                    'gross_amount' => (int) $order->harga,
+                ],
                 'customer_details' => [
                     'first_name' => $order->nama_pemesan ?? $order->user->name,
-                    'email' => $order->user->email ?? 'customer@mail.com',
-                    'phone' => $order->no_wa ?? $order->user->whatsapp,
+                    'email'      => $order->user->email ?? 'customer@mail.com',
+                    'phone'      => $order->no_wa ?? $order->user->whatsapp,
                 ],
                 'item_details' => [
                     [
-                        'id' => $order->product_id ?? $order->id, // Diselaraskan menggunakan ID produk jika kolom tersedia
-                        'price' => (int)$order->harga,
+                        'id'       => $order->product_id ?? $order->id, // Diselaraskan menggunakan ID produk jika kolom tersedia
+                        'price'    => (int)$order->harga,
                         'quantity' => 1,
-                        'name' => 'Sewa Motor: ' . substr($order->nama_motor, 0, 40), // Batasi max 40 karakter aturan Midtrans
+                        'name'     => 'Sewa Motor: ' . substr($order->nama_motor, 0, 40), // Batasi max 40 karakter aturan Midtrans
                     ]
-                ]
+                ],
+                'callbacks' => [
+                    'finish' => route('order.index'),
+                ],
+                'override_notification_url' => route('midtrans.webhook'),
             ];
 
-            // Dapatkan token Snap dari API Midtrans Sandbox
+            // Dapatkan token Snap dari API Midtrans
             $snapToken = Snap::getSnapToken($params);
 
-            Log::info('Snap Token', [
-                'token' => $snapToken,
-                'order_id' => $midtransOrderId,
-            ]);
-
-            // Menggunakan updateOrCreate untuk mencegah penumpukan baris baru di tabel payments pada order_id yang sama
+            // Simpan / Perbarui record payment secara langsung saat token Snap dibuat
             Payment::updateOrCreate(
                 ['order_id' => $order->id],
                 [
                     'midtrans_order_id' => $midtransOrderId,
-                    'jumlah_bayar' => (int) $order->harga,
+                    'jumlah_bayar'      => (int) $order->harga,
                     'metode_pembayaran' => $request->metode_pembayaran,
-                    'payment_type' => null,
-                    'midtrans_transaction_id' => null,
                     'status_pembayaran' => 'pending',
                 ]
             );
 
+            // Log hanya order_id, JANGAN log snap token di production
+            Log::info('Midtrans Snap: Token berhasil dibuat.', [
+                'order_id' => $midtransOrderId,
+            ]);
+
             return response()->json([
-                'success' => true,
+                'success'    => true,
                 'snap_token' => $snapToken
             ]);
 
@@ -172,34 +174,62 @@ class OrderController extends Controller
     }
 
     /**
-     * Memperbarui status pesanan secara instan melalui callback lokal front-end.
+     * Memperbarui status pesanan secara instan melalui callback front-end (Midtrans Snap JS result).
      */
-    // public function updateStatusLokal(Request $request, $id): JsonResponse {
+    public function finishPayment(Request $request, $id): JsonResponse
+    {
+        try {
+            $order = Order::findOrFail($id);
 
-    //     try {
-    //         $order = Order::findOrFail($id);
+            // Keamanan: Pastikan user hanya bisa merubah pesanan miliknya sendiri
+            if ((int)$order->user_id !== (int)Auth::id()) {
+                return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+            }
 
-    //         // Keamanan: Pastikan user hanya bisa merubah pesanan miliknya sendiri
-    //         if ((int)$order->user_id !== (int)Auth::id()) {
-    //             return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-    //         }
+            $transactionId     = $request->input('transaction_id');
+            $paymentType       = $request->input('payment_type');
+            $transactionStatus = $request->input('transaction_status', 'settlement');
 
-    //         // Update status pada tabel orders
-    //         // Menyesuaikan string dengan pengecekan 'success' pada template Blade Anda
-    //         Payment::where('order_id', $order->id)->update([
-    //             'status_pembayaran' => 'success'
-    //         ]);
+            $statusPembayaran = 'pending';
+            if (in_array($transactionStatus, ['settlement', 'capture', 'success'])) {
+                $statusPembayaran = 'success';
+            } elseif (in_array($transactionStatus, ['expire', 'cancel', 'deny'])) {
+                $statusPembayaran = 'failed';
+            }
 
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Pembayaran berhasil.'
-    //         ]); // Menyimpan nilai 'success'
+            $paymentData = [
+                'status_pembayaran' => $statusPembayaran,
+            ];
 
-    //     } catch (ModelNotFoundException $e) {
-    //         return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error update status lokal: ' . $e->getMessage());
-    //         return response()->json(['success' => false, 'message' => 'Gagal memperbarui status'], 500);
-    //     }
-    // }
+            if (!empty($transactionId)) {
+                $paymentData['midtrans_transaction_id'] = $transactionId;
+            }
+
+            if (!empty($paymentType)) {
+                $paymentData['payment_type']      = $paymentType;
+                $paymentData['metode_pembayaran'] = $paymentType;
+            }
+
+            Payment::updateOrCreate(
+                ['order_id' => $order->id],
+                $paymentData
+            );
+
+            if ($statusPembayaran === 'success') {
+                $order->status = 'Lunas';
+                $order->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status pembayaran berhasil diperbarui.'
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
+        } catch (\Exception $e) {
+            Log::error('Error finish payment frontend: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui status'], 500);
+        }
+    }
 }

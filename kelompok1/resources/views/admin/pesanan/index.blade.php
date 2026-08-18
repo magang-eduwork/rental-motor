@@ -59,7 +59,7 @@
     <!-- ================= DAFTAR KARTU PESANAN (CARDS) ================= -->
     <div class="space-y-4">
         @forelse($orders as $order)
-            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between gap-6 hover:shadow-md transition-all">
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:shadow-md transition-all">
                 
                 <!-- Motor & Nama Info -->
                 <div class="flex items-center gap-4 min-w-[220px]">
@@ -68,67 +68,70 @@
                     </div>
                     <div>
                         <span class="text-xs text-gray-400 font-medium block">Kendaraan Rental</span>
-                        <h3 class="font-bold text-gray-800 text-base">{{ $order->nama_motor }}</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Pemesan: <span class="font-medium text-gray-700">{{ $order->nama_pemesan ?? 'User' }}</span></p>
+                        <h3 class="font-bold text-gray-800 text-base leading-tight">{{ $order->nama_motor }}</h3>
+                        <p class="text-xs text-gray-500 mt-1">Pemesan: <span class="font-medium text-gray-700">{{ $order->nama_pemesan ?? 'User' }}</span></p>
                     </div>
                 </div>
 
-                <!-- Kode Booking -->
-                <div>
-                    <span class="text-xs text-gray-400 font-medium block mb-1">Kode Booking</span>
-                    <span class="font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg text-sm">{{ $order->kode_booking }}</span>
-                </div>
-
-                <!-- Tanggal Booking -->
-                <div>
-                    <span class="text-xs text-gray-400 font-medium block mb-1">Tanggal Booking</span>
-                    <span class="text-sm font-semibold text-gray-700">
-                        {{ \Carbon\Carbon::parse($order->tanggal_booking)->translatedFormat('d M Y') }}
-                    </span>
-                </div>
-
-                 <!-- Metode Pembayaran -->
-                <div>
-                    <span class="text-xs text-gray-400 font-medium block mb-1">Metode Pembayaran</span>
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">{{ $order->payment?->metode_pembayaran ?? '-'  }}</span>
-                </div>
-
-                <!-- Status Pembayaran & Kendaraan -->
-                <div class="flex items-center gap-4">
-                    <!-- Pembayaran -->
+                <!-- Detail Grid (Responsif: 2 kolom di mobile/tablet, flex di desktop) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:items-center lg:justify-between gap-4 lg:gap-6 flex-1 w-full">
+                    <!-- Kode Booking -->
                     <div>
-                        <span class="text-xs text-gray-400 font-medium block mb-1">Status Pembayaran</span>
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
-                            @switch($order->payment?->status_pembayaran)
-                                @case('success') bg-green-100 text-green-700 @break
-                                @case('pending') bg-yellow-100 text-yellow-700 @break
-                                @case('failed') bg-red-100 text-red-700 @break
-                                @default bg-gray-100 text-gray-700
-                            @endswitch">
-                            {{ $order->payment?->status_pembayaran ?? 'Belum Bayar' }}
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Kode Booking</span>
+                        <span class="inline-block font-mono font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg text-sm">{{ $order->kode_booking }}</span>
+                    </div>
+
+                    <!-- Tanggal Booking -->
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Tanggal Booking</span>
+                        <span class="text-sm font-semibold text-gray-700">
+                            {{ \Carbon\Carbon::parse($order->tanggal_booking)->translatedFormat('d M Y') }}
                         </span>
                     </div>
 
-                    <!-- Kendaraan -->
+                     <!-- Metode Pembayaran -->
                     <div>
-                        <span class="text-xs text-gray-400 font-medium block mb-1" style="padding-left: 15px;">Status Kendaraan</span>
-                        <span style="margin-left: 20px;" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700" >
-                            {{ $order->status }}
-                        </span>
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Metode Pembayaran</span>
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">{{ $order->payment?->metode_pembayaran ?? '-'  }}</span>
                     </div>
-                </div>
 
-                <!-- Harga -->
-                <div>
-                    <span class="text-xs text-gray-400 font-medium block mb-1">Harga</span>
-                    <span class="font-bold text-gray-900 text-base">Rp{{ number_format($order->harga, 0, ',', '.') }}</span>
+                    <!-- Status Pembayaran & Kendaraan -->
+                    <div class="col-span-2 sm:col-span-1 flex flex-row lg:flex-row gap-4 items-center">
+                        <!-- Pembayaran -->
+                        <div>
+                            <span class="text-xs text-gray-400 font-medium block mb-1">Status Pembayaran</span>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold
+                                @switch($order->payment?->status_pembayaran)
+                                    @case('success') bg-green-100 text-green-700 @break
+                                    @case('pending') bg-yellow-100 text-yellow-700 @break
+                                    @case('failed') bg-red-100 text-red-700 @break
+                                    @default bg-gray-100 text-gray-700
+                                @endswitch">
+                                {{ $order->payment?->status_pembayaran ?? 'Belum Bayar' }}
+                            </span>
+                        </div>
+
+                        <!-- Kendaraan -->
+                        <div>
+                            <span class="text-xs text-gray-400 font-medium block mb-1">Status Kendaraan</span>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                {{ $order->status }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Harga -->
+                    <div>
+                        <span class="text-xs text-gray-400 font-medium block mb-1">Harga</span>
+                        <span class="font-bold text-gray-900 text-base block">Rp{{ number_format($order->harga, 0, ',', '.') }}</span>
+                    </div>
                 </div>
 
                 <!-- Tombol Aksi Update -->
-                <div>
+                <div class="w-full lg:w-auto">
                     <button type="button" 
                             onclick='openUpdateModal(@json($order))'
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer">
+                            class="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer text-center">
                         Update
                     </button>
                 </div>
